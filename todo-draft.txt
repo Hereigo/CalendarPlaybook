@@ -1,0 +1,7 @@
+Open questions in section 14 need answers before approval, most importantly:
+
+- Which host runs production. The intent names none, and SQLite needs a persistent volume.
+- Whether the new projects go in this repo or a new one.
+- Whether month view is enough for v1.
+
+The playbook also suggests loading your organization's brand, security, and compliance skills before approving the spec. I didn't load any, so that review is still open.
