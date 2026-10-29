@@ -18,7 +18,7 @@
 
 The entry points with no prerequisites are capturing intent, creating `CLAUDE.md`, setting up the feedback loop, and writing skills.
 
-If you want, I can scaffold this in a new folder: an `intent/` template, a starter `CLAUDE.md`, and a `plan.md` placeholder. Tell me the project name and stack, or whether it goes in this repo (the ASP.NET MVC 5 project) or a new one.
+If you want, I can scaffold this in a new folder: an `intent/` template, a starter `CLAUDE.md`, and a `plan.md` placeholder.
 
 Sources:
 - [The AI-native SDLC playbook (claude.com)](https://claude.com/resources/articles/the-ai-native-sdlc-playbook)

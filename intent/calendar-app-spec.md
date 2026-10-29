@@ -7,7 +7,7 @@
 
 ## 1. Summary
 
-A single-user-role calendar web app. Each signed-in user creates, views, updates and deletes their own private events. Events are single-occurrence or all-day, or recurring by a fixed rule with an end date. Times are in Europe/Helsinki. Reminders fire at event start, in the app and as local browser or OS notifications.
+A single-user-role calendar web app. Each signed-in user creates, views, updates and deletes their own private events. Events are single-occurrence or all-day, or recurring by a fixed rule with an end date. Times are in Europe/Helsinki. Reminders fire at event start, in the app and as browser notifications (Notification API). No operating system notifications.
 
 ## 2. Goals and non-goals
 
@@ -27,6 +27,7 @@ A single-user-role calendar web app. Each signed-in user creates, views, updates
 - Reminders while the app is closed (no server push).
 - GDPR tooling (export, erasure). Retention is indefinite.
 - Calendar import/export, multiple calendars, time zones other than Europe/Helsinki.
+- Week view, day view, agenda view, or any view other than month view.
 
 ## 3. Users and access
 
@@ -145,36 +146,36 @@ The recurrence engine lives in `Recurrence/` and has no dependency on EF Core or
 
 ## 10. Data model
 
-SQLite via EF Core. Tables:
+SQL Server via EF Core. Local development runs SQL Server 2022 or later in a Docker container. Production runs SQL Server. Both use the same EF Core migrations. Tables:
 
 **Events**
 
 | Column | Type | Notes |
 |---|---|---|
-| Id | GUID | PK |
-| OwnerId | TEXT | Auth0 `sub`. Indexed. |
-| Title | TEXT | 1–200 chars |
-| Description | TEXT NULL | up to 4000 chars |
-| Kind | TEXT | `Single`, `AllDay`, `Recurring` |
-| StartUtc | TEXT NULL | Timed events and timed recurring events |
-| EndUtc | TEXT NULL | Timed single events |
-| StartDate | TEXT NULL | `YYYY-MM-DD`. All-day events and all-day recurring events. |
-| EndDate | TEXT NULL | `YYYY-MM-DD`, inclusive. All-day single events. |
-| TimeZone | TEXT | `Europe/Helsinki` |
-| RuleType | TEXT NULL | `EveryDays`, `MonthDay`, `WeekDay`, `YearDay` |
-| Interval | INTEGER NULL | X for `EveryDays` |
-| DayOfMonth | INTEGER NULL | `MonthDay`, `YearDay` |
-| Month | INTEGER NULL | `YearDay` |
-| DayOfWeek | INTEGER NULL | `WeekDay` (ISO 1–7) |
-| UntilDate | TEXT NULL | `YYYY-MM-DD`, inclusive. Required for `Recurring`. |
-| CreatedAtUtc | TEXT | |
-| UpdatedAtUtc | TEXT | |
+| Id | uniqueidentifier | PK |
+| OwnerId | nvarchar(255) | Auth0 `sub`. Indexed. |
+| Title | nvarchar(200) | 1–200 chars |
+| Description | nvarchar(4000) NULL | up to 4000 chars |
+| Kind | nvarchar(16) | `Single`, `AllDay`, `Recurring` |
+| StartUtc | datetime2(3) NULL | UTC. Timed events and timed recurring events |
+| EndUtc | datetime2(3) NULL | UTC. Timed single events |
+| StartDate | date NULL | All-day events and all-day recurring events. |
+| EndDate | date NULL | Inclusive. All-day single events. |
+| TimeZone | nvarchar(64) | `Europe/Helsinki` |
+| RuleType | nvarchar(16) NULL | `EveryDays`, `MonthDay`, `WeekDay`, `YearDay` |
+| Interval | int NULL | X for `EveryDays` |
+| DayOfMonth | int NULL | `MonthDay`, `YearDay` |
+| Month | int NULL | `YearDay` |
+| DayOfWeek | int NULL | `WeekDay` (ISO 1–7) |
+| UntilDate | date NULL | Inclusive. Required for `Recurring`. |
+| CreatedAtUtc | datetime2(3) | UTC |
+| UpdatedAtUtc | datetime2(3) | UTC |
 
-Timed recurring events also need a local start time. Store it in `StartLocalTime` (`HH:mm`) with `StartDate` as the first local date.
+Timed recurring events also need a local start time. Store it in `StartLocalTime` (`time`) with `StartDate` as the first local date.
 
 Constraints: `CHECK` that `Kind` and the nullable columns agree. Index on `(OwnerId, StartUtc)` and `(OwnerId, StartDate)`.
 
-Migrations are EF Core migrations, applied on startup in development and by an explicit step in production.
+Migrations are EF Core migrations, applied on startup in development (against the Docker container) and by an explicit step in production. There is one migration set, for SQL Server only.
 
 ## 11. Security
 
@@ -184,21 +185,23 @@ Migrations are EF Core migrations, applied on startup in development and by an e
 - EF Core parameterized queries only. No raw SQL built from input.
 - HTTPS only. HSTS on. CORS allows only the SPA origin.
 - Logs do not contain event titles or descriptions.
-- Secrets (Auth0 client secret if used, connection strings) come from environment or secret store. Not committed.
+- Secrets (Auth0 client secret if used, connection strings) come from environment or secret store. Not committed. The local Docker SQL Server `sa` password is also kept out of the repo (environment variable or .NET user secrets).
 - Dependency updates and a vulnerability scan run in CI.
 
 ## 12. Test plan
 
-The Test stage requires a verification command to pass before the work is reported done. Proposed command: `dotnet test` for the backend and `npm test` plus `npm run build` for the frontend. Both run in CI.
+The Test stage requires a verification command to pass before the work is reported done. Proposed command: `dotnet test` for the backend and `npm test` plus `npm run build` for the frontend. Both run in CI. CI must have Docker available so the integration tests can start SQL Server.
 
 | Level | What | Key cases |
 |---|---|---|
 | Unit | Recurrence engine | Every X days across year boundary; monthly day 31 in Feb, Apr, Jun, Sep, Nov; yearly 29 Feb in non-leap years; weekday rule first occurrence; until date inclusive; until date before start (rejected). |
 | Unit | Time zone conversion | 10:00 local before and after DST start and end; DST gap (03:30 on spring-forward day). |
 | Unit | Validation | Title length; end before start; missing until date; X ≤ 0; day of month outside 1–31. |
-| Integration | API with SQLite | Owner isolation (user B cannot read or change user A's events); series update changes all occurrences; series delete removes all; range limit. |
+| Integration | API with SQL Server (Docker container, via Testcontainers) | Owner isolation (user B cannot read or change user A's events); series update changes all occurrences; series delete removes all; range limit. |
 | Integration | Auth | Missing token 401; token for another audience rejected. |
 | E2E | Frontend | Sign in; create a recurring event; see it in month view; edit series; delete series; sign out. |
+| Performance | API latency | `GET /api/events` over a 42-day range against SQL Server in Docker, with a single user's typical data set. Fails the build if p95 is 300 ms or more. |
+| Accessibility | UI, WCAG 2.1 AA | Automated scan (axe or equivalent) of the month view, event form, and delete confirmation. Zero violations. Keyboard-only run of create, edit, delete and sign-out. |
 
 Auth0 is mocked in integration tests with a locally generated JWKS.
 
@@ -211,16 +214,21 @@ These were not explicit in the intent. Each is a reasonable default and is easy 
 3. **Until date is required** for every recurring event, because the intent allows only "until a specific date".
 4. **All-day events** can span multiple days (start date to end date, inclusive). If only single-day all-day is wanted, drop `EndDate` for all-day events.
 5. **DST gap** (a time that does not exist on spring-forward day) moves to the next valid time.
-6. **Notifications** use the in-app and browser Notification API. No server push, so nothing fires when the app is closed. The intent says "OS local notifications". Browser Notification API is the only option without a native client. Confirm this is acceptable.
+6. **Notifications** use the in-app and browser Notification API only. No operating system notifications. No server push, so nothing fires when the app is closed.
 7. **Reminder offset** is not in v1.
 8. **Ownership errors** return `404`, not `403`.
+9. **Database** is SQL Server in both development (Docker container) and production. SQLite is not used. The container image tag is pinned in the dev compose file, so dev and prod run the same major version.
+10. **.NET SDK** must be 10.0.403 or later.
+11. **Views.** v1 has month view only. The month view is the ui-template layout. Week, day and agenda views are out of scope.
+12. **Accessibility and performance.** The UI meets WCAG 2.1 AA. API p95 latency for `GET /api/events` over a 42-day range is under 300 ms for a single user's data.
+13. **Policy review defaults.** No internal brand, security, compliance, or UX policies apply. The spec is reviewed against OWASP ASVS Level 1 and the OWASP Top 10 for security (§11), WCAG 2.1 AA for UX (decision 12), and the intent's compliance statement (no GDPR, indefinite retention). Brand follows `ui-template/`. Earlier SDKs are not supported. The backend repo enforces this with `global.json`, and the verification command fails on an older SDK.
 
 ## 14. Open questions
 
-1. **Production hosting.** The intent says "deployed to production" but names no host, OS, or hosting model. SQLite on a shared host or container needs a persistent volume. Which host, and who owns it?
-2. **Week and day views.** The ui-template is a month view only. Is month view enough for v1?
-3. **Organizational skills.** The playbook suggests loading organizational skills (brand, security, compliance, UX) before generating the spec. None were loaded for this draft. Review this spec against them before approval.
-4. **Accessibility and performance targets.** The intent says "not yet intended". Proposed default: WCAG 2.1 AA for the UI, and API p95 under 300 ms for a 42-day range on a single user's data. Confirm or replace.
+1. **Production hosting.** The intent says "deployed to production" but names no host, OS, or hosting model. SQL Server needs a host: a VM, a managed service (for example Azure SQL, which changes the Docker-only dev parity), or a container with a persistent volume. Which host, who owns the database, and what is the backup and restore policy?
+2. **Week and day views.** Resolved: month view only for v1. Week and day views are out of scope (see §2 and §13 decision 11).
+3. **Organizational skills.** Resolved: no internal policies apply beyond what is written in this spec and the intent. The review uses the defaults in §13 decision 13.
+4. **Accessibility and performance targets.** Resolved: WCAG 2.1 AA for the UI, and API p95 under 300 ms for a 42-day range on a single user's data (see §13 decision 12).
 5. **Deadline.** None set.
 
 ## 15. Acceptance criteria
@@ -240,6 +248,8 @@ Each criterion maps to a test in section 12.
 11. A reminder notification appears in the app at start time for a timed event, and as a browser notification if permission is granted.
 12. The verification command passes in CI before the release is deployed.
 13. The app is deployed to production (pending open question 1).
+14. The month view, event form, and delete confirmation have no WCAG 2.1 AA violations in the automated scan. Create, edit, delete and sign-out can be completed with the keyboard only.
+15. `GET /api/events` for a 42-day range has a p95 under 300 ms against SQL Server in Docker, with a single user's data.
 
 ## 16. Traceability to intent
 
@@ -254,9 +264,9 @@ Each criterion maps to a test in section 12.
 | Feb 29 and day 30/31 shift | 5.2 |
 | Europe/Helsinki | 6 |
 | Private events only | 3 |
-| In-app and local notifications at start | 7 |
+| In-app and browser notifications at start | 7 |
 | React frontend from ui-template | 8 (FR-2), 13 |
-| .NET 10, Minimal API, Vertical Slices, EF Core SQLite | 9, 9.1, 10 |
+| .NET 10, Minimal API, Vertical Slices, EF Core with SQL Server | 9, 9.1, 10, 13 (decision 9) |
 | Auth0 | 3, 11 |
 | Indefinite retention, no GDPR | 2 (non-goals) |
 | Deployed to production | 15, 14 |
