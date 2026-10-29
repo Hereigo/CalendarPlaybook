@@ -218,11 +218,10 @@ These were not explicit in the intent. Each is a reasonable default and is easy 
 ## 14. Open questions
 
 1. **Production hosting.** The intent says "deployed to production" but names no host, OS, or hosting model. SQLite on a shared host or container needs a persistent volume. Which host, and who owns it?
-2. **Where the new projects live.** The intent says this repo (ASP.NET MVC 5) is deprecated. Should the new backend and frontend be new folders in this repo, or a new repository?
-3. **Week and day views.** The ui-template is a month view only. Is month view enough for v1?
-4. **Organizational skills.** The playbook suggests loading organizational skills (brand, security, compliance, UX) before generating the spec. None were loaded for this draft. Review this spec against them before approval.
-5. **Accessibility and performance targets.** The intent says "not yet intended". Proposed default: WCAG 2.1 AA for the UI, and API p95 under 300 ms for a 42-day range on a single user's data. Confirm or replace.
-6. **Deadline.** None set.
+2. **Week and day views.** The ui-template is a month view only. Is month view enough for v1?
+3. **Organizational skills.** The playbook suggests loading organizational skills (brand, security, compliance, UX) before generating the spec. None were loaded for this draft. Review this spec against them before approval.
+4. **Accessibility and performance targets.** The intent says "not yet intended". Proposed default: WCAG 2.1 AA for the UI, and API p95 under 300 ms for a 42-day range on a single user's data. Confirm or replace.
+5. **Deadline.** None set.
 
 ## 15. Acceptance criteria
 

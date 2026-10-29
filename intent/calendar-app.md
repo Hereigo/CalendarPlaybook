@@ -46,7 +46,7 @@ Calendar app with authorization and ability to add, update, delete different typ
 
 ## Success criteria
 
-- The app is deployed to production.
+- All planned features are implemented and work correctly.
 
 ## Open questions
 
