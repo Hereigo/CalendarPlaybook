@@ -2,7 +2,7 @@
 
 - **Originator:** Hereigo
 - **Date:** 2026-10-28
-- **Status:** draft
+- **Status:** approved
 - **Source:** idea
 
 ## Problem
@@ -23,7 +23,7 @@ Calendar app with authorization and ability to add, update, delete different typ
     - ../ui-template/Calendar.htm
     - ../ui-template/Calendar.css
 - Backend (.NET 10): new project, Minimal API, Vertical Slices architectural pattern, EF Core with SQL Server.
-- Data: EF Core with SQL Server. Local development runs SQL Server in a Docker container; production runs SQL Server.
+- Data: EF Core with SQL Server. Local development runs SQL Server in a Podman container; production runs SQL Server.
 - External: Auth0 auth provider.
 
 ## Calendar scope
@@ -39,7 +39,7 @@ Calendar app with authorization and ability to add, update, delete different typ
 
 ## Constraints
 
-- Platform: React frontend, .NET 10 backend, SQL Server db (Docker for development, SQL Server for production)
+- Platform: React frontend, .NET 10 backend, SQL Server db (Podman for development, SQL Server for production)
 - .NET SDK: 10.0.403 or later. Earlier SDKs are not supported.
 - Security and compliance: Auth0 provider and modern security best practices for web apps. Data retention: indefinite. No GDPR requirements.
 - Performance: API p95 under 300 ms for a 42-day range on a single user's data
