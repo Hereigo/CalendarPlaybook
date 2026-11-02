@@ -7,13 +7,13 @@ Read the spec section that matches your task before changing behaviour.
 ## Layout
 
 - `global.json` pins the .NET SDK to 10.0.403 or later patch. Earlier SDKs are not supported.
-- `src/CalendarPlaybook.Api/` - .NET 10 Minimal API, Vertical Slices.
-  - `Features/` - one folder per slice (`Events/CreateEvent`, `Events/ListOccurrences`, `Notifications/ListUpcoming`, ...).
-  - `Recurrence/` - pure domain logic. No EF Core or HTTP references. Keep it that way.
-  - `Infrastructure/` - EF Core DbContext, Auth0 config, migrations (SQL Server only).
+- `src/CalendarPlaybook.Api/` - .NET 10 Minimal API, Vertical Slices. `Program.cs` is still the template; no endpoints yet.
+  - `Recurrence/` - pure domain logic. No EF Core or HTTP references. Keep it that way. This is the only folder that exists so far.
+  - `Features/` (planned, spec §9.1) - one folder per slice (`Events/CreateEvent`, `Events/ListOccurrences`, `Notifications/ListUpcoming`, ...).
+  - `Infrastructure/` (planned, spec §9.1) - EF Core DbContext, Auth0 config, migrations (SQL Server only).
 - `tests/CalendarPlaybook.Api.Tests/` - xUnit tests. `Recurrence/` has unit tests for the engine.
 - `ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`). The frontend is not scaffolded yet.
-- `Continue_here.md` - handoff notes. Update or delete it when its steps are done.
+- `Continue_here.md` - handoff notes, when a session leaves work unfinished. Update or delete it when its steps are done.
 
 ## Commands
 
@@ -42,4 +42,4 @@ Run from the repo root.
 
 - Do not commit unless asked.
 - Before a change is reported done, the relevant verification command must pass.
-- Decisions 1–13 in spec §13 are defaults pending product-owner review. Do not silently change them.
+- The decisions in spec §13 are defaults pending product-owner review. Do not silently change them.
