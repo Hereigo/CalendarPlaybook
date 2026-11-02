@@ -8,8 +8,9 @@ services:
       ACCEPT_EULA: "Y"
       MSSQL_PID: Express
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    # Loopback only, so SQL Server is not reachable from the local network.
     ports:
-      - "1433:1433"
+      - "127.0.0.1:1433:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
 
