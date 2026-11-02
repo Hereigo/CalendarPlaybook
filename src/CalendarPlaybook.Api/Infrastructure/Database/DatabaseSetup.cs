@@ -14,13 +14,18 @@ public static class DatabaseSetup
             options.UseSqlServer(configuration.GetConnectionString("Calendar")));
     }
 
-    /// <summary>Applies pending migrations on startup in Development only. Production uses an explicit step (spec section 10).</summary>
+    /// <summary>
+    /// Development only: starts the local SQL Server container (if configured) and applies pending migrations.
+    /// Production uses an explicit migration step (spec section 10).
+    /// </summary>
     public static void MigrateInDevelopment(this WebApplication app)
     {
         if (!app.Environment.IsDevelopment())
         {
             return;
         }
+
+        DevSqlContainer.EnsureRunning(app);
 
         using var scope = app.Services.CreateScope();
         scope.ServiceProvider.GetRequiredService<CalendarDbContext>().Database.Migrate();
