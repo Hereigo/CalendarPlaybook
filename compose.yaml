@@ -1,0 +1,16 @@
+# Local SQL Server 2022 Express for development (spec section 10).
+# Set MSSQL_SA_PASSWORD in your environment before `podman compose up -d`. Never commit it.
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Express
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+
+volumes:
+  sqlserver-data:

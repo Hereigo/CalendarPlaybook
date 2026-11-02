@@ -7,11 +7,14 @@ Read the spec section that matches your task before changing behaviour.
 ## Layout
 
 - `global.json` pins the .NET SDK to 10.0.403 or later patch. Earlier SDKs are not supported.
-- `src/CalendarPlaybook.Api/` - .NET 10 Minimal API, Vertical Slices. `Program.cs` is still the template; no endpoints yet.
-  - `Recurrence/` - pure domain logic. No EF Core or HTTP references. Keep it that way. The only folder with code so far.
-  - `Features/` (empty, spec §9.1) - one folder per slice (`Events/CreateEvent`, `Events/ListOccurrences`, `Notifications/ListUpcoming`, ...).
-  - `Infrastructure/` (empty, spec §9.1) - EF Core DbContext, Auth0 config, migrations (SQL Server only).
-- `tests/CalendarPlaybook.Api.Tests/` - xUnit tests. `Recurrence/` has unit tests for the engine.
+- `src/CalendarPlaybook.Api/` - .NET 10 Minimal API, Vertical Slices. `Program.cs` wires problem details, string enums, Auth0 and the `/api/events` group.
+  - `Recurrence/` - pure domain logic (engine, `HelsinkiTime` local↔UTC). No EF Core or HTTP references. Keep it that way.
+  - `Features/` (spec §9.1) - one folder per slice. Done: `Events/CreateEvent`. Next: `GetEvent`, `UpdateEvent`, `DeleteEvent`, `ListOccurrences`, `Notifications/ListUpcoming`.
+  - `Infrastructure/` (spec §9.1) - `CalendarDbContext`, `Events/` (entity, enums, configuration), `Auth/` (JWT, `GetOwnerId()`), `Database/`, `Migrations/` (SQL Server only).
+- `compose.yaml` - local SQL Server 2022 Express for Podman. Needs `MSSQL_SA_PASSWORD` in the environment.
+- Config keys (user secrets or environment, never committed): `ConnectionStrings:Calendar`, `Auth0:Domain`, `Auth0:Audience`.
+- `plan.md` - the current plan (spec-sync skill).
+- `tests/CalendarPlaybook.Api.Tests/` - xUnit unit tests, mirroring the source folders.
 - `ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`). The frontend is not scaffolded yet.
 - `Continue_here.md` - handoff notes, when a session leaves work unfinished. Update or delete it when its steps are done.
 - `.claude/` - guardrails. Hooks need Node.js on PATH.

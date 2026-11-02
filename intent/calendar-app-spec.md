@@ -80,6 +80,7 @@ Each shifted occurrence still counts as one occurrence. It is not skipped. The r
 - Occurrences are not stored. Only the rule is stored. Occurrences are computed when a date range is queried.
 - Times are computed in local wall-clock time (Europe/Helsinki) and then converted to UTC. A 10:00 event is 10:00 local before and after a DST change.
 - An occurrence that falls in a DST gap (e.g. 03:30 on the spring-forward day) is moved to the next valid local time (04:30 in Helsinki). This is a documented choice; see section 13.
+- A local time in the repeated hour on the autumn DST change (e.g. 03:30 on the fall-back day, which happens twice) uses the earlier instant, at the summer offset (EEST, UTC+3). The same rule applies to single timed events.
 
 ## 6. Time zone
 
@@ -159,7 +160,7 @@ SQL Server 2022 Express via EF Core. Local development runs SQL Server 2022 Expr
 | Title | nvarchar(200) | 1–200 chars |
 | Description | nvarchar(4000) NULL | up to 4000 chars |
 | Kind | nvarchar(16) | `Single`, `AllDay`, `Recurring` |
-| StartUtc | datetime2(3) NULL | UTC. Timed events and timed recurring events |
+| StartUtc | datetime2(3) NULL | UTC. Timed single events |
 | EndUtc | datetime2(3) NULL | UTC. Timed single events |
 | StartDate | date NULL | All-day events and all recurring events (first local date of the series). |
 | StartLocalTime | time NULL | Timed recurring events. Local wall-clock start time. |
