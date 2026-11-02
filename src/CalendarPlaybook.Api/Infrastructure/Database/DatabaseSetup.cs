@@ -11,7 +11,18 @@ public static class DatabaseSetup
     public static IServiceCollection AddCalendarDb(this IServiceCollection services, IConfiguration configuration)
     {
         return services.AddDbContext<CalendarDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("Calendar")));
+        {
+            var connectionString = configuration.GetConnectionString("Calendar");
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException(
+                    "ConnectionStrings:Calendar is not set. Set it with " +
+                    "`dotnet user-secrets set ConnectionStrings:Calendar \"<connection string>\" --project src/CalendarPlaybook.Api` " +
+                    "or the ConnectionStrings__Calendar environment variable.");
+            }
+
+            options.UseSqlServer(connectionString);
+        });
     }
 
     /// <summary>
