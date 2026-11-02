@@ -2,7 +2,8 @@
 # Set MSSQL_SA_PASSWORD in your environment before `podman compose up -d`. Never commit it.
 services:
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04
+    # Pinned by digest (SQL Server 16.0.4305.5, 2022-latest as of 2026-10-03). The tag alone moves; the digest does not.
+    image: mcr.microsoft.com/mssql/server:2022-latest@sha256:cf8f0ab2ebe61feec2eed2629061a07d247f791c2a8ddda74a4ac9f06a291718
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: Express
