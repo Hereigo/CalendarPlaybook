@@ -14,6 +14,9 @@ Read the spec section that matches your task before changing behaviour.
 - `tests/CalendarPlaybook.Api.Tests/` - xUnit tests. `Recurrence/` has unit tests for the engine.
 - `ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`). The frontend is not scaffolded yet.
 - `Continue_here.md` - handoff notes, when a session leaves work unfinished. Update or delete it when its steps are done.
+- `.claude/` - guardrails. Hooks need Node.js on PATH.
+  - `settings.json` + `hooks/` - asks before edits to `intent/`; blocks edits to existing EF migrations and secrets in config files; the Stop hook runs `dotnet test` when backend files changed and blocks "done" if it fails.
+  - `skills/` - `feature-slice` (adding an endpoint), `ef-migration` (schema changes), `spec-sync` (plan.md, spec divergence, handoff).
 
 ## Commands
 

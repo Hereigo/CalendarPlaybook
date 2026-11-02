@@ -3,7 +3,7 @@
 - **Intent:** [calendar-app.md](calendar-app.md)
 - **Author:** Hereigo
 - **Date:** 2026-10-28
-- **Status:** draft, pending product owner review
+- **Status:** approved
 
 ## 1. Summary
 
