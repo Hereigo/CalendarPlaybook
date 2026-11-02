@@ -42,7 +42,7 @@ A single-user-role calendar web app. Each signed-in user creates, views, updates
 |---|---|---|
 | Single (timed) | Start, end (local date and time, Europe/Helsinki) | End must be after start. |
 | All-day | Start date, end date (both inclusive) | No time of day. Single-day all-day is an end date equal to the start date. |
-| Recurring | Start (date and time, or date for all-day), duration (timed only), recurrence rule (section 5), until date | Occurrences are generated from the rule. A timed occurrence ends at its local start plus the duration (1 minute to 24 hours). An all-day occurrence covers one day. |
+| Recurring | Start (date and time, or date for all-day), end time (timed only), recurrence rule (section 5), until date | Occurrences are generated from the rule. A timed occurrence starts and ends on the same local day; end time must be after start time. An all-day occurrence covers one day. |
 
 Every event has: title (required, 1–200 chars), description (optional, up to 4000 chars), kind.
 
@@ -124,6 +124,8 @@ Base path: `/api`. All endpoints require a valid Auth0 bearer token.
 
 Errors use RFC 9457 problem details. Validation errors return `400`. Unknown or foreign ids return `404`. Missing or invalid token returns `401`.
 
+Enums in requests and responses (`kind`, `ruleType`, `dayOfWeek`) use string names, not numbers, e.g. `"dayOfWeek": "Monday"`. Weekday numbering differs between .NET and JavaScript (Sunday = 0) and ISO 8601 (Sunday = 7), so names avoid off-by-one errors.
+
 ### 9.1 Vertical slices
 
 Each feature is a folder with its own request, validation, handler, and endpoint mapping:
@@ -161,19 +163,19 @@ SQL Server 2022 Express via EF Core. Local development runs SQL Server 2022 Expr
 | EndUtc | datetime2(3) NULL | UTC. Timed single events |
 | StartDate | date NULL | All-day events and all recurring events (first local date of the series). |
 | StartLocalTime | time NULL | Timed recurring events. Local wall-clock start time. |
-| DurationMinutes | int NULL | Timed recurring events. 1–1440. |
+| EndLocalTime | time NULL | Timed recurring events. Local wall-clock end time, same day as the start, after `StartLocalTime`. |
 | EndDate | date NULL | Inclusive. All-day single events. |
 | TimeZone | nvarchar(64) | `Europe/Helsinki` |
 | RuleType | nvarchar(16) NULL | `EveryDays`, `MonthDay`, `WeekDay`, `YearDay` |
 | Interval | int NULL | X for `EveryDays` |
 | DayOfMonth | int NULL | `MonthDay`, `YearDay` |
 | Month | int NULL | `YearDay` |
-| DayOfWeek | int NULL | `WeekDay` (ISO 1–7, Monday = 1). .NET `DayOfWeek` uses Sunday = 0, so the mapping converts Sunday to 7. |
+| DayOfWeek | nvarchar(9) NULL | `WeekDay`. Name `Monday`–`Sunday`, matching .NET `DayOfWeek` names. `CHECK` allows only those seven values. |
 | UntilDate | date NULL | Inclusive. Required for `Recurring`. |
 | CreatedAtUtc | datetime2(3) | UTC |
 | UpdatedAtUtc | datetime2(3) | UTC |
 
-Timed recurring events do not use `StartUtc` or `EndUtc`. Each occurrence's start and end are computed from `StartDate`, `StartLocalTime` and `DurationMinutes` in local time, then converted to UTC (section 5.4).
+Timed recurring events do not use `StartUtc` or `EndUtc`. Each occurrence's start and end are computed from the occurrence date, `StartLocalTime` and `EndLocalTime` in local time, then converted to UTC (section 5.4). A start or end in a DST gap moves to the next valid local time.
 
 Constraints: `CHECK` that `Kind` and the nullable columns agree. Index on `(OwnerId, StartUtc)` and `(OwnerId, StartDate)`.
 
@@ -198,9 +200,8 @@ The Test stage requires a verification command to pass before the work is report
 |---|---|---|
 | Unit | Recurrence engine | Every X days across year boundary; monthly day 31 in Feb, Apr, Jun, Sep, Nov; yearly 29 Feb in non-leap years; weekday rule first occurrence; until date inclusive; until date before start (rejected). |
 | Unit | Time zone conversion | 10:00 local before and after DST start and end; DST gap (03:30 on spring-forward day). |
-| Unit | Validation | Title length; end before start; missing until date; X ≤ 0; day of month outside 1–31; yearly day that never exists (30 Feb, 31 Apr); timed recurring duration outside 1–1440 minutes. |
-| Unit | Mapping | `DayOfWeek` stored as ISO 1–7 and read back (Sunday ↔ 7). |
-| Integration | API with SQL Server (Podman container, via Testcontainers) | Owner isolation (user B cannot read or change user A's events); series update changes all occurrences; series delete removes all; range limit. |
+| Unit | Validation | Title length; end before start; missing until date; X ≤ 0; day of month outside 1–31; yearly day that never exists (30 Feb, 31 Apr); timed recurring end time missing, equal to, or before start time. |
+| Integration | API with SQL Server (Podman container, via Testcontainers) | Owner isolation (user B cannot read or change user A's events); series update changes all occurrences; series delete removes all; range limit; round-trip all 7 weekdays of a `WeekDay` rule through SQL Server (Sunday included). |
 | Integration | Auth | Missing token 401; token for another audience rejected. |
 | E2E | Frontend | Sign in; create a recurring event; see it in month view; edit series; delete series; sign out. |
 | Performance | API latency | `GET /api/events` over a 42-day range against SQL Server in Podman, with a single user's typical data set. Fails the build if p95 is 300 ms or more. |
@@ -225,8 +226,8 @@ These were not explicit in the intent. Each is a reasonable default and is easy 
 11. **Views.** v1 has month view only. The month view is the ui-template layout. Week, day and agenda views are out of scope.
 12. **Accessibility and performance.** The UI meets WCAG 2.1 AA. API p95 latency for `GET /api/events` over a 42-day range is under 300 ms for a single user's data.
 13. **Policy review defaults.** No internal brand, security, compliance, or UX policies apply. The spec is reviewed against OWASP ASVS Level 1 and the OWASP Top 10 for security (§11), WCAG 2.1 AA for UX (decision 12), and the intent's compliance statement (no GDPR, indefinite retention). Brand follows `ui-template/`. Earlier SDKs are not supported. The backend repo enforces this with `global.json`, and the verification command fails on an older SDK.
-14. **Timed recurring duration.** A timed recurring event stores a duration (`DurationMinutes`, 1–1440), not an end time. An occurrence ends at its local start plus the duration, so it can cross midnight. Duration is computed in local wall-clock time, like the start (section 5.4). Recurring all-day occurrences are one day long; multi-day recurring all-day events are out of scope for v1.
-15. **Yearly rule validation.** A yearly rule whose month and day never exist (30–31 February, 31 April, June, September, November) is rejected with `400`. 29 February is allowed and shifts per section 5.2.
+14. **Timed recurring end time.** A timed recurring event stores a local end time (`EndLocalTime`) next to `StartLocalTime`. Each occurrence starts and ends on the same local day, and the end time must be after the start time, so occurrences cannot cross midnight. Both times are local wall-clock times converted to UTC per occurrence (section 5.4), so a 10:00–11:00 event stays 10:00–11:00 across DST changes. Recurring all-day occurrences are one day long; multi-day recurring all-day events are out of scope for v1.
+15. **Yearly rule validation.** A yearly rule whose month and day never exist (30–31 February, 31 April, June, September, November) is rejected with `400`. 29 February is allowed and shifts per section 5.2. Note for review: the intent says a "monthly or yearly rule's day" of 30/31 shifts in a shorter month. This spec reads that as applying to yearly rules only for 29 February, because a yearly rule fixes the month and 31 April never exists. Monthly rules keep the shift (section 5.2).
 
 ## 14. Open questions
 

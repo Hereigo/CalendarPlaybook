@@ -177,6 +177,39 @@ public class RecurrenceEngineTests
         Assert.Throws<ArgumentOutOfRangeException>(() => new RecurrenceRule.MonthDay(day));
     }
 
+    [Theory]
+    [InlineData(2, 30)]
+    [InlineData(2, 31)]
+    [InlineData(4, 31)]
+    [InlineData(6, 31)]
+    [InlineData(9, 31)]
+    [InlineData(11, 31)]
+    [InlineData(1, 0)]
+    [InlineData(1, 32)]
+    public void YearDay_DayThatNeverExists_IsRejected(int month, int day)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new RecurrenceRule.YearDay(month, day));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(13)]
+    public void YearDay_MonthOutsideOneToTwelve_IsRejected(int month)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new RecurrenceRule.YearDay(month, 1));
+    }
+
+    [Theory]
+    [InlineData(2, 29)]
+    [InlineData(4, 30)]
+    [InlineData(12, 31)]
+    public void YearDay_DayThatExists_IsAccepted(int month, int day)
+    {
+        var rule = new RecurrenceRule.YearDay(month, day);
+
+        Assert.Equal(day, rule.DayOfMonth);
+    }
+
     private static List<DateOnly> Expand(RecurrenceRule rule, DateOnly start, DateOnly until, DateOnly? from = null, DateOnly? to = null)
     {
         // Default window covers the whole series so the tests read as "the full series".

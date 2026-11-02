@@ -48,7 +48,7 @@ public abstract record RecurrenceRule
         public DayOfWeek DayOfWeek { get; }
     }
 
-    /// <summary>Same month and day every year. Feb 29 shifts to Feb 28 in non-leap years.</summary>
+    /// <summary>Same month and day every year. Feb 29 shifts to Feb 28 in non-leap years; days that never exist are rejected.</summary>
     public sealed record YearDay : RecurrenceRule
     {
         public YearDay(int month, int dayOfMonth)
@@ -58,9 +58,10 @@ public abstract record RecurrenceRule
                 throw new ArgumentOutOfRangeException(nameof(month), month, "Month must be between 1 and 12.");
             }
 
-            if (dayOfMonth is < 1 or > 31)
+            // A leap year is used so Feb 29 passes; days that never exist (Feb 30, Apr 31) are rejected (spec section 5.1).
+            if (dayOfMonth < 1 || dayOfMonth > DateTime.DaysInMonth(2024, month))
             {
-                throw new ArgumentOutOfRangeException(nameof(dayOfMonth), dayOfMonth, "Day of month must be between 1 and 31.");
+                throw new ArgumentOutOfRangeException(nameof(dayOfMonth), dayOfMonth, "Day of month does not exist in that month.");
             }
 
             Month = month;

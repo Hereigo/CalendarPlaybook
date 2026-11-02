@@ -18,8 +18,6 @@
 
 The entry points with no prerequisites are capturing intent, creating `CLAUDE.md`, setting up the feedback loop, and writing skills.
 
-If you want, I can scaffold this in a new folder: an `intent/` template, a starter `CLAUDE.md`, and a `plan.md` placeholder.
-
 Sources:
 - [The AI-native SDLC playbook (claude.com)](https://claude.com/resources/articles/the-ai-native-sdlc-playbook)
 - [The AI-native SDLC playbook (blog version)](https://claude.com/blog/the-ai-native-sdlc-playbook)
