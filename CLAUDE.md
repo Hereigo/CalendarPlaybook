@@ -19,7 +19,8 @@ Read the spec section that matches your task before changing behaviour.
 - `docs/` - also `local-setup.md` (prerequisites, secrets, run), `AI-SDLC-Playbook-howto.md` (the SDLC process) and `podman-sql-notes.md`.
 - `tests/CalendarPlaybook.Api.Tests/` - xUnit unit tests, mirroring the source folders.
 - `tests/CalendarPlaybook.Api.IntegrationTests/` - xUnit v3 (3.x, VSTest; 4.x needs Microsoft.Testing.Platform) API tests through `WebApplicationFactory<Program>`, real JwtBearer against a local JWKS (`Infrastructure/TestTokens`), SQL Server via Testcontainers. New slices derive from `IntegrationTest` and use a fresh `NewSub()` per user.
-- `docs/ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`). The frontend is not scaffolded yet.
+- `docs/ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`).
+- `src/CalendarPlaybook.Web/` - Vite + React + TypeScript SPA with Vitest. Scaffolded from the template: month grid with prev/next navigation and today marker (`monthGrid.ts`, `App.tsx`). Not yet done: Auth0, API client, event forms, notifications, CORS.
 - `Continue_here.md` - handoff notes, when a session leaves work unfinished. Update or delete it when its steps are done.
 - `.claude/` - guardrails. Hooks need Node.js on PATH.
   - `settings.json` + `hooks/` - asks before edits to `intent/`; blocks edits to existing EF migrations and secrets in config files; the Stop hook runs `dotnet test` when backend files changed and blocks "done" if it fails.
@@ -33,7 +34,7 @@ Run from the repo root.
 - Backend tests: `dotnet test` (the verification command for backend work). Runs unit and integration tests.
   - Unit only: `dotnet test tests/CalendarPlaybook.Api.Tests`. Integration only: `dotnet test tests/CalendarPlaybook.Api.IntegrationTests`.
 - Backend run: `dotnet run --project src/CalendarPlaybook.Api`
-- Frontend (not yet scaffolded): `npm test`, `npm run build`. Both are verification commands in CI once the frontend exists.
+- Frontend (run in `src/CalendarPlaybook.Web`): `npm install`, `npm run dev`, `npm test`, `npm run build`. The last two are the verification commands for frontend work.
 - Integration tests need the Podman machine running: Testcontainers starts a throwaway SQL Server 2022 Express container per run (~35 s) and applies the migrations. Without Podman they are skipped and `dotnet test` stays green, so check the summary for `Skipped`. `CALENDAR_INTEGRATION_REQUIRED=true` makes them fail instead (CI).
 - Lint: none configured yet.
 
