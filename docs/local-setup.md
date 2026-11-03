@@ -16,6 +16,7 @@ How to run the calendar web app on your machine. The app is built with .NET foll
 ## Steps
 
 1. Start SQL Server. Set `MSSQL_SA_PASSWORD` in the environment or in `.env` (copy `.env_example`), then follow `docs/podman-sql-notes.md` to create the `calendar-sql` container. The app starts that container on its own in Development.
+
 2. Set the secrets with user secrets (never commit them):
 
    ```bash

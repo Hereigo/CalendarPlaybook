@@ -52,3 +52,24 @@ Look for “SQL Server is now ready for client connections.” After that, set t
 ```ps
 podman image inspect <_ID_> --format "{{json .RepoDigests}}"
 ```
+
+---
+---
+
+**Port binding.** `netstat` shows 1433 listening only on `[::1]` (IPv6 loopback), with no `127.0.0.1` listener. Your app connects over IPv6 and works. The VS Code extension may resolve `localhost` to `127.0.0.1` and get refused.
+
+**TLS certificate.** SQL Server in a container uses a self-signed certificate, and the extension rejects it by default. This is the most common cause when the password is correct.
+
+Try these in order in the connection dialog:
+
+1. Set **Trust server certificate** to `True`. In the connection string this is `TrustServerCertificate=True`. Set **Encrypt** to `Optional` if it's offered.
+
+2. If it still fails, change the server from `localhost,1433` to `[::1],1433`. Also try `127.0.0.1,1433` to confirm which address works.
+
+3. In the connection string, use a comma between host and port (`localhost,1433`), not a colon.
+
+If neither of those works, send me the exact error text from the extension, such as `ECONNREFUSED`, a certificate error, or `Login failed`. That will show which of these is the cause. If it's a login failure, run this to see whether the container's SQL log shows the attempt:
+
+```bash
+podman logs --tail 30 calendar-sql
+```
