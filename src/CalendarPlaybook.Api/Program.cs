@@ -4,6 +4,7 @@ using CalendarPlaybook.Api.Features.Events.DeleteEvent;
 using CalendarPlaybook.Api.Features.Events.GetEvent;
 using CalendarPlaybook.Api.Features.Events.ListOccurrences;
 using CalendarPlaybook.Api.Features.Events.UpdateEvent;
+using CalendarPlaybook.Api.Infrastructure;
 using CalendarPlaybook.Api.Infrastructure.Auth;
 using CalendarPlaybook.Api.Infrastructure.Database;
 
@@ -44,6 +45,11 @@ app.MapGroup("/api/events")
     .MapUpdateEvent()
     .MapDeleteEvent()
     .MapListOccurrences();
+
+if (app.Environment.IsDevelopment())
+{
+    DevWebServer.Start(app);
+}
 
 app.MigrateInDevelopment();
 
