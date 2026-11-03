@@ -19,21 +19,24 @@ How to run the calendar web app on your machine. The app is built with .NET foll
 
 2. Set the secrets with user secrets (never commit them):
 
-   ```bash
-   dotnet user-secrets set ConnectionStrings:Calendar "Server=localhost,1433;Database=Calendar;User Id=sa;Password=<password>;TrustServerCertificate=True" --project src/CalendarPlaybook.Api
-   dotnet user-secrets set Auth0:Domain "<your-tenant>.auth0.com" --project src/CalendarPlaybook.Api
-   dotnet user-secrets set Auth0:Audience "<api-identifier>" --project src/CalendarPlaybook.Api
-   ```
+```sh
+dotnet user-secrets set ConnectionStrings:Calendar "Server=localhost,1433;Database=Calendar;User Id=sa;Password=<password>;TrustServerCertificate=True" --project src/CalendarPlaybook.Api
+dotnet user-secrets set Auth0:Domain "<your-tenant>.auth0.com" --project src/CalendarPlaybook.Api
+dotnet user-secrets set Auth0:Audience "<api-identifier>" --project src/CalendarPlaybook.Api
+
+# to watch
+dotnet user-secrets list --project src/CalendarPlaybook.Api
+```
 
 3. Run the API. In Development, it applies migrations on startup:
 
-   ```bash
-   dotnet run --project src/CalendarPlaybook.Api
-   ```
+```sh
+dotnet run --project src/CalendarPlaybook.Api
+```
 
 ## Tests
 
-```bash
+```sh
 dotnet test
 ```
 
@@ -51,7 +54,7 @@ Testcontainers speaks the Docker API. The Podman machine serves it on the named 
 
 If discovery fails (another machine name, or a broken Docker context), point Testcontainers at the pipe yourself:
 
-```powershell
+```ps1
 [Environment]::SetEnvironmentVariable("DOCKER_HOST", "npipe://./pipe/podman-machine-default", "User")
 ```
 
