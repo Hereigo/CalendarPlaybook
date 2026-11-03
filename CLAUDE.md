@@ -18,6 +18,7 @@ Read the spec section that matches your task before changing behaviour.
 - `docs/plan.md` - the current plan (spec-sync skill).
 - `docs/` - also `local-setup.md` (prerequisites, secrets, run), `AI-SDLC-Playbook-howto.md` (the SDLC process) and `podman-sql-notes.md`.
 - `tests/CalendarPlaybook.Api.Tests/` - xUnit unit tests, mirroring the source folders.
+- `tests/CalendarPlaybook.Api.IntegrationTests/` - xUnit v3 (3.x, VSTest; 4.x needs Microsoft.Testing.Platform) API tests through `WebApplicationFactory<Program>`, real JwtBearer against a local JWKS (`Infrastructure/TestTokens`), SQL Server via Testcontainers. New slices derive from `IntegrationTest` and use a fresh `NewSub()` per user.
 - `docs/ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`). The frontend is not scaffolded yet.
 - `Continue_here.md` - handoff notes, when a session leaves work unfinished. Update or delete it when its steps are done.
 - `.claude/` - guardrails. Hooks need Node.js on PATH.
@@ -29,10 +30,11 @@ Read the spec section that matches your task before changing behaviour.
 Run from the repo root.
 
 - Backend build: `dotnet build`
-- Backend tests: `dotnet test` (the verification command for backend work)
+- Backend tests: `dotnet test` (the verification command for backend work). Runs unit and integration tests.
+  - Unit only: `dotnet test tests/CalendarPlaybook.Api.Tests`. Integration only: `dotnet test tests/CalendarPlaybook.Api.IntegrationTests`.
 - Backend run: `dotnet run --project src/CalendarPlaybook.Api`
 - Frontend (not yet scaffolded): `npm test`, `npm run build`. Both are verification commands in CI once the frontend exists.
-- Integration tests (not written yet) will need Podman running, since they start SQL Server 2022 Express via Testcontainers. Today `dotnet test` runs unit tests only.
+- Integration tests need the Podman machine running: Testcontainers starts a throwaway SQL Server 2022 Express container per run (~35 s) and applies the migrations. Without Podman they are skipped and `dotnet test` stays green, so check the summary for `Skipped`. `CALENDAR_INTEGRATION_REQUIRED=true` makes them fail instead (CI).
 - Lint: none configured yet.
 
 ## Conventions

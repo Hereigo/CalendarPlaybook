@@ -36,3 +36,29 @@ How to run the calendar web app on your machine. The app is built with .NET foll
 ```bash
 dotnet test
 ```
+
+This runs both test projects:
+
+- `tests/CalendarPlaybook.Api.Tests`: unit tests, no dependencies.
+- `tests/CalendarPlaybook.Api.IntegrationTests`: the API over HTTP against a real SQL Server 2022 Express that Testcontainers starts in Podman for each run (about 35 s, removed afterwards). Auth0 is replaced by a locally generated signing key (JWKS); no Auth0 tenant or user secrets are used.
+
+### Podman as the Testcontainers endpoint (Windows)
+
+Testcontainers speaks the Docker API. The Podman machine serves it on the named pipe `\\.\pipe\podman-machine-default`. Nothing to configure in the usual case:
+
+- Podman registers a Docker context for that pipe, which Testcontainers discovers, and
+- the test fixture falls back to that pipe when `DOCKER_HOST` is not set.
+
+If discovery fails (another machine name, or a broken Docker context), point Testcontainers at the pipe yourself:
+
+```powershell
+[Environment]::SetEnvironmentVariable("DOCKER_HOST", "npipe://./pipe/podman-machine-default", "User")
+```
+
+or put `docker.host=npipe://./pipe/podman-machine-default` in `%USERPROFILE%\.testcontainers.properties`. `podman machine inspect` shows the pipe name under `PodmanPipe`. Rootless Podman works, including the Ryuk cleanup container; no extra settings needed.
+
+### Without Podman
+
+If no Podman/Docker endpoint is reachable, the integration tests are **skipped** with the message "Podman/Docker is not reachable…", and `dotnet test` still exits 0 (the summary shows `Skipped: 13`). Start the machine with `podman machine start` and run again. Other failures (image pull, migration, SQL errors) fail the run.
+
+In CI, set `CALENDAR_INTEGRATION_REQUIRED=true` so that a missing endpoint fails the run instead of skipping (spec §12).

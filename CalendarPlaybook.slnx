@@ -3,6 +3,7 @@
     <Project Path="src/CalendarPlaybook.Api/CalendarPlaybook.Api.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/CalendarPlaybook.Api.IntegrationTests/CalendarPlaybook.Api.IntegrationTests.csproj" />
     <Project Path="tests/CalendarPlaybook.Api.Tests/CalendarPlaybook.Api.Tests.csproj" />
   </Folder>
 </Solution>
