@@ -12,3 +12,6 @@ export function buildMonthGrid(year: number, month: number, today: Date): GridDa
     return { date, day: date.getDate(), outside: date.getMonth() !== month, today: sameDay(date, today) };
   });
 }
+
+export const toIsoDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;

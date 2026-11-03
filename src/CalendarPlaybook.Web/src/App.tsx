@@ -1,67 +1,35 @@
-import { useState } from 'react';
-import { buildMonthGrid } from './monthGrid';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useCallback, useMemo } from 'react';
+import { createListOccurrences } from './api';
+import Calendar from './Calendar';
 
-const weekdays = [
-  ['M', 'Mon'],
-  ['T', 'Tue'],
-  ['W', 'Wed'],
-  ['T', 'Thu'],
-  ['F', 'Fri'],
-  ['S', 'Sat'],
-  ['S', 'Sun'],
-];
+const apiUrl = import.meta.env.VITE_API_URL ?? '';
 
 export default function App() {
-  const [view, setView] = useState(() => {
-    const now = new Date();
-    return { year: now.getFullYear(), month: now.getMonth() };
-  });
+  const { isLoading, isAuthenticated, error, loginWithRedirect, logout, getAccessTokenSilently } = useAuth0();
+  const getToken = useCallback(async () => {
+    const token = await getAccessTokenSilently();
+    if (!token) throw new Error('No access token');
+    return token;
+  }, [getAccessTokenSilently]);
+  const listOccurrences = useMemo(() => createListOccurrences(apiUrl, getToken), [getToken]);
 
-  const shift = (delta: number) =>
-    setView(({ year, month }) => {
-      const d = new Date(year, month + delta, 1);
-      return { year: d.getFullYear(), month: d.getMonth() };
-    });
-
-  const label = new Date(view.year, view.month, 1).toLocaleDateString('en-GB', {
-    month: 'long',
-    year: 'numeric',
-  });
-  const days = buildMonthGrid(view.year, view.month, new Date());
-
+  if (isLoading) return <p className="error" role="status">Loading…</p>;
+  if (error) return <p className="error" role="alert">{error.message}</p>;
+  if (!isAuthenticated) {
+    return (
+      <div className="page">
+        <header className="site-header">
+          <h1>Calendar</h1>
+          <button type="button" onClick={() => void loginWithRedirect()}>Sign in</button>
+        </header>
+      </div>
+    );
+  }
   return (
-    <div className="page">
-      <header className="site-header">
-        <h1>Calendar</h1>
-        <nav className="month-nav">
-          <button type="button" aria-label="Previous month" onClick={() => shift(-1)}>←</button>
-          <span id="monthLabel" className="month-label">{label}</span>
-          <button type="button" aria-label="Next month" onClick={() => shift(1)}>→</button>
-        </nav>
-      </header>
-      <aside className="sidebar">
-        <h2>Upcoming</h2>
-        <ul />
-      </aside>
-      <main className="main">
-        <div className="calendar" role="grid" aria-labelledby="monthLabel">
-          {weekdays.map(([short, long], i) => (
-            <div key={i} className="weekday" role="columnheader">
-              <span>{short}</span>
-              <span>{long}</span>
-            </div>
-          ))}
-          {days.map((d) => (
-            <div
-              key={d.date.getTime()}
-              className={`day${d.outside ? ' outside' : ''}${d.today ? ' today' : ''}`}
-              role="gridcell"
-            >
-              <span className="num">{d.day}</span>
-            </div>
-          ))}
-        </div>
-      </main>
-    </div>
+    <Calendar
+      listOccurrences={listOccurrences}
+      onSignOut={() => void logout({ logoutParams: { returnTo: window.location.origin } })}
+    />
   );
 }

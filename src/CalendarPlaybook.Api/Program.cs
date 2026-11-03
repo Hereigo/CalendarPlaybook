@@ -15,6 +15,13 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddAuth0(builder.Configuration);
 builder.Services.AddCalendarDb(builder.Configuration);
 
+var spaOrigin = builder.Configuration["Cors:AllowedOrigin"];
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+{
+    if (!string.IsNullOrWhiteSpace(spaOrigin))
+        policy.WithOrigins(spaOrigin).WithMethods("GET", "POST", "PUT", "DELETE").WithHeaders("Authorization", "Content-Type");
+}));
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -26,6 +33,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

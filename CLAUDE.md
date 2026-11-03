@@ -14,13 +14,13 @@ Read the spec section that matches your task before changing behaviour.
 - Local SQL Server 2022 Express in Podman, two options (use one, both bind port 1433). Both need `MSSQL_SA_PASSWORD` in the environment or `.env` (template: `.env_example`).
   - `podman run ... --name calendar-sql` from `docs/podman-sql-notes.md`. In Development the app runs `podman start calendar-sql` on startup (`DevSqlContainer:Name` in `appsettings.Development.json`) and waits until SQL Server accepts connections.
   - `compose.yaml` (`podman compose up -d`). Its container has a different name, so the app does not start it; start it yourself.
-- Config keys (user secrets or environment, never committed): `ConnectionStrings:Calendar`, `Auth0:Domain`, `Auth0:Audience`.
+- Config keys (user secrets or environment, never committed): `ConnectionStrings:Calendar`, `Auth0:Domain`, `Auth0:Audience`, `Cors:AllowedOrigin` (SPA origin; `http://localhost:5173` in Development).
 - `docs/plan.md` - the current plan (spec-sync skill).
 - `docs/` - also `local-setup.md` (prerequisites, secrets, run), `AI-SDLC-Playbook-howto.md` (the SDLC process) and `podman-sql-notes.md`.
 - `tests/CalendarPlaybook.Api.Tests/` - xUnit unit tests, mirroring the source folders.
 - `tests/CalendarPlaybook.Api.IntegrationTests/` - xUnit v3 (3.x, VSTest; 4.x needs Microsoft.Testing.Platform) API tests through `WebApplicationFactory<Program>`, real JwtBearer against a local JWKS (`Infrastructure/TestTokens`), SQL Server via Testcontainers. New slices derive from `IntegrationTest` and use a fresh `NewSub()` per user.
 - `docs/ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`).
-- `src/CalendarPlaybook.Web/` - Vite + React + TypeScript SPA with Vitest. Scaffolded from the template: month grid with prev/next navigation and today marker (`monthGrid.ts`, `App.tsx`). Not yet done: Auth0, API client, event forms, notifications, CORS.
+- `src/CalendarPlaybook.Web/` - Vite + React + TypeScript SPA with Vitest. Month grid with prev/next navigation and today marker (`monthGrid.ts`). Auth0 sign-in (`@auth0/auth0-react`, in-memory tokens), `api.ts` client for `GET /api/events` and `Calendar.tsx` month view with occurrences. Config in `.env.local` (template `.env.example`: `VITE_AUTH0_*`, `VITE_API_URL`). Not yet done: event forms (create/edit/delete), notifications.
 - `Continue_here.md` - handoff notes, when a session leaves work unfinished. Update or delete it when its steps are done.
 - `.claude/` - guardrails. Hooks need Node.js on PATH.
   - `settings.json` + `hooks/` - asks before edits to `intent/`; blocks edits to existing EF migrations and secrets in config files; the Stop hook runs `dotnet test` when backend files changed and blocks "done" if it fails.
