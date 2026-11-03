@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useMemo } from 'react';
-import { createListOccurrences } from './api';
+import { createApi } from './api';
 import Calendar from './Calendar';
 
 const apiUrl = import.meta.env.VITE_API_URL ?? '';
@@ -12,7 +12,7 @@ export default function App() {
     if (!token) throw new Error('No access token');
     return token;
   }, [getAccessTokenSilently]);
-  const listOccurrences = useMemo(() => createListOccurrences(apiUrl, getToken), [getToken]);
+  const api = useMemo(() => createApi(apiUrl, getToken), [getToken]);
 
   if (isLoading) return <p className="error" role="status">Loading…</p>;
   if (error) return <p className="error" role="alert">{error.message}</p>;
@@ -28,7 +28,7 @@ export default function App() {
   }
   return (
     <Calendar
-      listOccurrences={listOccurrences}
+      api={api}
       onSignOut={() => void logout({ logoutParams: { returnTo: window.location.origin } })}
     />
   );

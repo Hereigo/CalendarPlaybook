@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import type { ListOccurrences, Occurrence } from './api';
+import type { CalendarApi, EventInput, Occurrence } from './api';
+import EventForm from './EventForm';
+import { emptyForm, fromEvent, type FormState } from './formModel';
 import { buildMonthGrid, toIsoDate } from './monthGrid';
 
 const weekdays = [
@@ -12,15 +14,20 @@ const weekdays = [
   ['S', 'Sun'],
 ];
 
-type Props = { listOccurrences: ListOccurrences; onSignOut?: () => void };
+type Props = { api: CalendarApi; onSignOut?: () => void };
 
-export default function Calendar({ listOccurrences, onSignOut }: Props) {
+/** `id` is set when editing an existing event. */
+type Editor = { id: string | null; initial: FormState };
+
+export default function Calendar({ api, onSignOut }: Props) {
   const [view, setView] = useState(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
   });
   const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [editor, setEditor] = useState<Editor | null>(null);
+  const [reload, setReload] = useState(0);
 
   const shift = (delta: number) =>
     setView(({ year, month }) => {
@@ -38,7 +45,8 @@ export default function Calendar({ listOccurrences, onSignOut }: Props) {
 
   useEffect(() => {
     let current = true;
-    listOccurrences(from, to)
+    api
+      .listOccurrences(from, to)
       .then((items) => {
         if (!current) return;
         setOccurrences(items);
@@ -52,7 +60,27 @@ export default function Calendar({ listOccurrences, onSignOut }: Props) {
     return () => {
       current = false;
     };
-  }, [listOccurrences, from, to]);
+  }, [api, from, to, reload]);
+
+  const close = () => setEditor(null);
+  const saved = () => {
+    close();
+    setReload((n) => n + 1);
+  };
+  const save = async (input: EventInput) => {
+    if (editor?.id) await api.updateEvent(editor.id, input);
+    else await api.createEvent(input);
+    saved();
+  };
+  const remove = async () => {
+    if (editor?.id) await api.deleteEvent(editor.id);
+    saved();
+  };
+  const openEvent = (id: string) =>
+    api
+      .getEvent(id)
+      .then((event) => setEditor({ id, initial: fromEvent(event) }))
+      .catch((e: Error) => setError(e.message));
 
   return (
     <div className="page">
@@ -85,18 +113,39 @@ export default function Calendar({ listOccurrences, onSignOut }: Props) {
                 key={iso}
                 className={`day${d.outside ? ' outside' : ''}${d.today ? ' today' : ''}`}
                 role="gridcell"
+                onClick={() => setEditor({ id: null, initial: emptyForm(iso) })}
               >
                 <span className="num">{d.day}</span>
                 {occurrences
                   .filter((o) => o.startDate <= iso && iso <= o.endDate)
                   .map((o) => (
-                    <div key={o.eventId} className="event" title={o.title}>{o.title}</div>
+                    <button
+                      key={o.eventId}
+                      type="button"
+                      className="event"
+                      title={o.title}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void openEvent(o.eventId);
+                      }}
+                    >
+                      {o.title}
+                    </button>
                   ))}
               </div>
             );
           })}
         </div>
       </main>
+      {editor && (
+        <EventForm
+          initial={editor.initial}
+          editing={editor.id !== null}
+          onSave={save}
+          onDelete={remove}
+          onClose={close}
+        />
+      )}
     </div>
   );
 }

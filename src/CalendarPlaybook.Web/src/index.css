@@ -276,3 +276,106 @@ input {
         display: none;
     }
 }
+
+.event {
+    display: block;
+    width: 100%;
+    border: 0;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(31, 39, 51, 0.45);
+}
+
+.dialog {
+    width: min(28rem, 100%);
+    max-height: 100%;
+    overflow-y: auto;
+    display: grid;
+    gap: 0.6rem;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.dialog h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.dialog .field {
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.85rem;
+}
+
+.dialog input:not([type='checkbox']),
+.dialog select,
+.dialog textarea {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font: inherit;
+}
+
+.dialog .check {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.dialog .notice {
+    margin: 0;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    background: #eef2f8;
+    border-radius: 5px;
+}
+
+.dialog .field-error {
+    color: #d33;
+}
+
+.dialog .actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.dialog .actions .spacer {
+    flex: 1;
+}
+
+.dialog .actions button {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 5px;
+    padding: 0.25rem 0.9rem;
+}
+
+.dialog .actions button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.dialog .actions .danger {
+    color: #d33;
+}
+
+.site-header > button {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 5px;
+    padding: 0 0.7rem;
+}
