@@ -143,7 +143,7 @@ public class CreateEventTests(SqlServerFixture fixture) : IntegrationTest(fixtur
         Assert.Empty(await EventsOwnedBy(sub));
     }
 
-    public static TheoryData<string> RejectedTokens => new() { "none", "foreign key", "wrong audience", "wrong issuer", "expired" };
+    public static TheoryData<string> RejectedTokens => new() { "none", "foreign key", "wrong audience", "wrong issuer", "expired", "no sub" };
 
     [Theory]
     [MemberData(nameof(RejectedTokens))]
@@ -157,6 +157,7 @@ public class CreateEventTests(SqlServerFixture fixture) : IntegrationTest(fixtur
             "wrong audience" => TestTokens.Create(sub, audience: "https://another-api.test"),
             "wrong issuer" => TestTokens.Create(sub, issuer: "https://another-tenant.auth0.test/"),
             "expired" => TestTokens.Create(sub, expiresUtc: DateTime.UtcNow.AddMinutes(-10)),
+            "no sub" => TestTokens.Create(sub: null),
             _ => throw new ArgumentOutOfRangeException(nameof(token)),
         });
 

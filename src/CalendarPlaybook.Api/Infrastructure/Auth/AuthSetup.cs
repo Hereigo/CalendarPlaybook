@@ -32,6 +32,20 @@ public static class AuthSetup
 
                 // Keep "sub" as "sub" instead of mapping it to the long NameIdentifier claim type.
                 options.MapInboundClaims = false;
+
+                // A token without a usable sub has no owner, so it is an invalid token: 401, not a 500 later in GetOwnerId().
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        if (string.IsNullOrWhiteSpace(context.Principal?.FindFirstValue("sub")))
+                        {
+                            context.Fail("The token has no sub claim.");
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
         return services.AddAuthorization();

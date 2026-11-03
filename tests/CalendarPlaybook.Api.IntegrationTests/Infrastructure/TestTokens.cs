@@ -25,7 +25,7 @@ public static class TestTokens
     public static readonly OpenIdConnectConfiguration OpenIdConfiguration = CreateOpenIdConfiguration();
 
     public static string Create(
-        string sub,
+        string? sub,
         string audience = Audience,
         string issuer = Issuer,
         DateTime? expiresUtc = null,
@@ -37,7 +37,7 @@ public static class TestTokens
         {
             Issuer = issuer,
             Audience = audience,
-            Subject = new ClaimsIdentity([new Claim("sub", sub)]),
+            Subject = new ClaimsIdentity(sub is null ? [] : [new Claim("sub", sub)]),
             IssuedAt = expires.AddMinutes(-20),
             NotBefore = expires.AddMinutes(-20),
             Expires = expires,
