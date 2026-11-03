@@ -20,8 +20,8 @@ Calendar app with authorization and ability to add, update, delete different typ
 ## Affected systems
 
 - Frontend (React): ui-template files used as the starting markup:
-    - ../ui-template/Calendar.htm
-    - ../ui-template/Calendar.css
+    - ../docs/ui-template/Calendar.htm
+    - ../docs/ui-template/Calendar.css
 - Backend (.NET 10): new project, Minimal API, Vertical Slices architectural pattern, EF Core with SQL Server.
 - Data: EF Core with SQL Server. Local development runs SQL Server in a Podman container; production runs SQL Server.
 - External: Auth0 auth provider.

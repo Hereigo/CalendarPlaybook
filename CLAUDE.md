@@ -11,15 +11,18 @@ Read the spec section that matches your task before changing behaviour.
   - `Recurrence/` - pure domain logic (engine, `HelsinkiTime` local↔UTC). No EF Core or HTTP references. Keep it that way.
   - `Features/` (spec §9.1) - one folder per slice. Done: `Events/CreateEvent`. Next: `GetEvent`, `UpdateEvent`, `DeleteEvent`, `ListOccurrences`, `Notifications/ListUpcoming`.
   - `Infrastructure/` (spec §9.1) - `CalendarDbContext`, `Events/` (entity, enums, configuration), `Auth/` (JWT, `GetOwnerId()`), `Database/`, `Migrations/` (SQL Server only).
-- `compose.yaml` - local SQL Server 2022 Express for Podman. Needs `MSSQL_SA_PASSWORD` in the environment.
+- Local SQL Server 2022 Express in Podman, two options (use one, both bind port 1433). Both need `MSSQL_SA_PASSWORD` in the environment or `.env` (template: `.env_example`).
+  - `podman run ... --name calendar-sql` from `docs/podman-sql-notes.md`. In Development the app runs `podman start calendar-sql` on startup (`DevSqlContainer:Name` in `appsettings.Development.json`) and waits until SQL Server accepts connections.
+  - `compose.yaml` (`podman compose up -d`). Its container has a different name, so the app does not start it; start it yourself.
 - Config keys (user secrets or environment, never committed): `ConnectionStrings:Calendar`, `Auth0:Domain`, `Auth0:Audience`.
-- `plan.md` - the current plan (spec-sync skill).
+- `docs/plan.md` - the current plan (spec-sync skill).
+- `docs/` - also `AI-SDLC-Playbook-howto.md` (the SDLC process) and `podman-sql-notes.md`.
 - `tests/CalendarPlaybook.Api.Tests/` - xUnit unit tests, mirroring the source folders.
-- `ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`). The frontend is not scaffolded yet.
+- `docs/ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`). The frontend is not scaffolded yet.
 - `Continue_here.md` - handoff notes, when a session leaves work unfinished. Update or delete it when its steps are done.
 - `.claude/` - guardrails. Hooks need Node.js on PATH.
   - `settings.json` + `hooks/` - asks before edits to `intent/`; blocks edits to existing EF migrations and secrets in config files; the Stop hook runs `dotnet test` when backend files changed and blocks "done" if it fails.
-  - `skills/` - `feature-slice` (adding an endpoint), `ef-migration` (schema changes), `spec-sync` (plan.md, spec divergence, handoff).
+  - `skills/` - `feature-slice` (adding an endpoint), `ef-migration` (schema changes), `spec-sync` (`docs/plan.md`, spec divergence, handoff).
 
 ## Commands
 
