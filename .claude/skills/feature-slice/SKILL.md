@@ -32,5 +32,5 @@ Slices do not call each other. Shared domain logic goes to `Recurrence/` (pure, 
 ## Tests (required before done)
 
 - Unit tests for the validator and any pure logic in `tests/CalendarPlaybook.Api.Tests/<same path>`.
-- Integration tests (when the Testcontainers harness exists): happy path, `400`, `401`, and owner isolation (user B gets `404` on user A's id).
+- Integration tests in `tests/CalendarPlaybook.Api.IntegrationTests/<same path>`: happy path, `400`, `401`, and owner isolation (user B gets `404` on user A's id). Derive from `IntegrationTest`, use a fresh `NewSub()` per user and `CreateClientFor(sub)`; see `Features/Events/CreateEvent/CreateEventTests.cs`.
 - `dotnet test` must pass. The Stop hook enforces this.

@@ -59,6 +59,6 @@ or put `docker.host=npipe://./pipe/podman-machine-default` in `%USERPROFILE%\.te
 
 ### Without Podman
 
-If no Podman/Docker endpoint is reachable, the integration tests are **skipped** with the message "Podman/Docker is not reachable…", and `dotnet test` still exits 0 (the summary shows `Skipped: 13`). Start the machine with `podman machine start` and run again. Other failures (image pull, migration, SQL errors) fail the run.
+If no Podman/Docker endpoint is reachable, the integration tests are **skipped** with the message "Podman/Docker is not reachable…", and `dotnet test` still exits 0 (the summary shows `Skipped: 14` for the integration project). Start the machine with `podman machine start` and run again. Other failures (image pull, migration, SQL errors) fail the run.
 
 In CI, set `CALENDAR_INTEGRATION_REQUIRED=true` so that a missing endpoint fails the run instead of skipping (spec §12).
