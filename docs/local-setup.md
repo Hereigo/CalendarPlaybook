@@ -1,6 +1,6 @@
-# CalendarPlaybook
+# CalendarPlaybook local setup
 
-A calendar web app built with .NET following [The AI-native SDLC playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook).
+How to run the calendar web app on your machine. The app is built with .NET following [The AI-native SDLC playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook).
 
 - Intent: `intent/calendar-app.md`
 - Spec: `intent/calendar-app-spec.md`
@@ -13,7 +13,7 @@ A calendar web app built with .NET following [The AI-native SDLC playbook](https
 - Podman (local SQL Server 2022 Express)
 - Node.js on PATH (Claude Code hooks in `.claude/`)
 
-## Local setup
+## Steps
 
 1. Start SQL Server. Set `MSSQL_SA_PASSWORD` in the environment or in `.env` (copy `.env_example`), then follow `docs/podman-sql-notes.md` to create the `calendar-sql` container. The app starts that container on its own in Development.
 2. Set the secrets with user secrets (never commit them):

@@ -16,7 +16,7 @@ Read the spec section that matches your task before changing behaviour.
   - `compose.yaml` (`podman compose up -d`). Its container has a different name, so the app does not start it; start it yourself.
 - Config keys (user secrets or environment, never committed): `ConnectionStrings:Calendar`, `Auth0:Domain`, `Auth0:Audience`.
 - `docs/plan.md` - the current plan (spec-sync skill).
-- `docs/` - also `AI-SDLC-Playbook-howto.md` (the SDLC process) and `podman-sql-notes.md`.
+- `docs/` - also `local-setup.md` (prerequisites, secrets, run), `AI-SDLC-Playbook-howto.md` (the SDLC process) and `podman-sql-notes.md`.
 - `tests/CalendarPlaybook.Api.Tests/` - xUnit unit tests, mirroring the source folders.
 - `docs/ui-template/` - starting markup for the React frontend (`Calendar.htm`, `Calendar.css`). The frontend is not scaffolded yet.
 - `Continue_here.md` - handoff notes, when a session leaves work unfinished. Update or delete it when its steps are done.
