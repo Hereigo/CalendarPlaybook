@@ -1,5 +1,8 @@
 using System.Text.Json.Serialization;
 using CalendarPlaybook.Api.Features.Events.CreateEvent;
+using CalendarPlaybook.Api.Features.Events.DeleteEvent;
+using CalendarPlaybook.Api.Features.Events.GetEvent;
+using CalendarPlaybook.Api.Features.Events.UpdateEvent;
 using CalendarPlaybook.Api.Infrastructure.Auth;
 using CalendarPlaybook.Api.Infrastructure.Database;
 
@@ -27,7 +30,10 @@ app.UseAuthorization();
 
 app.MapGroup("/api/events")
     .RequireAuthorization()
-    .MapCreateEvent();
+    .MapCreateEvent()
+    .MapGetEvent()
+    .MapUpdateEvent()
+    .MapDeleteEvent();
 
 app.MigrateInDevelopment();
 
