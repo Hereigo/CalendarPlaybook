@@ -44,6 +44,10 @@ public class GetEventTests(SqlServerFixture fixture) : IntegrationTest(fixture)
         Assert.Equal("10:00:00", body.GetProperty("startTime").GetString());
         Assert.Equal("11:30:00", body.GetProperty("endTime").GetString());
         Assert.Equal("Europe/Helsinki", body.GetProperty("timeZone").GetString());
+        // Read back from SQL Server, the instants must still serialize as UTC (with a Z).
+        Assert.Equal("2027-06-01T07:00:00Z", body.GetProperty("startUtc").GetString());
+        Assert.Equal("2027-06-01T08:30:00Z", body.GetProperty("endUtc").GetString());
+        Assert.EndsWith("Z", body.GetProperty("createdAtUtc").GetString());
         Assert.Equal(JsonValueKind.Null, body.GetProperty("recurrence").ValueKind);
     }
 

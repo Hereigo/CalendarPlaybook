@@ -1,20 +1,28 @@
-# Plan: DeleteEvent slice (`DELETE /api/events/{id}`)
+# Plan: ListOccurrences slice (`GET /api/events?from=&to=`)
 
-- **Spec:** `intent/calendar-app-spec.md` §9 (`DELETE /api/events/{id}` deletes the event and its series, returns `204`; `404` unknown or foreign id; `401` no valid token), §5.3 (whole series only), §9.1 (slice layout), §11 (owner enforcement, no titles in logs), §12 (series delete integration row).
-- **Status:** implemented. `dotnet test` from the repo root with Podman up: 98 unit + 49 integration tests passed, 0 skipped.
-- **Previous steps (done):** Infrastructure + CreateEvent; integration-test harness; GetEvent; UpdateEvent.
+- **Spec:** `intent/calendar-app-spec.md` §9 (`GET /api/events?from=YYYY-MM-DD&to=YYYY-MM-DD` returns expanded occurrences, range inclusive, each item has `eventId`, `occurrenceStartUtc`, `occurrenceEndUtc` or dates for all-day, `kind`, `title`, max range 370 days), §5 (rules, month/day overflow, generation), §5.4 and §6 (wall-clock times per occurrence, DST gap and repeated hour), §10 (columns, indexes), §11 (owner enforcement, no titles in logs), §12 (range-limit integration row).
+- **Status:** implemented. `dotnet test` from the repo root with Podman up: 125 unit + 67 integration tests passed, 0 skipped.
+- **Previous steps (done):** Infrastructure + CreateEvent; integration-test harness; GetEvent; UpdateEvent; DeleteEvent.
 
 ## Decisions
 
-- **Hard delete, one row.** A recurring event is a single row (occurrences are computed), so deleting it removes the whole series. There is no soft delete or trash; the spec does not ask for one.
-- **Owner filter and 404:** load by `OwnerId == sub && Id == id`, then remove; no match returns `404`, so foreign and unknown ids take the same path. A repeated delete returns `404` the second time.
-- **`204` with no body**, as the spec says. Only the event id and kind are logged.
-- **No unit tests:** the slice has no pure logic (no validator, no mapping); the integration tests cover it end to end.
+The spec leaves these open; each is a default, none changes a §13 decision. Proposed spec wording is in Open points.
+
+- **Response is a bare JSON array** of items, ordered by local start date, all-day before timed, then start time, title, event id. Item fields: `eventId`, `kind`, `title`, `occurrenceStartUtc`/`occurrenceEndUtc` (timed only, serialized with `Z`), and `startDate`/`endDate` (Europe/Helsinki local dates, `endDate` inclusive) on **every** item. The local dates go beyond the spec's "dates for all-day": they let the month view place a timed occurrence in a cell without time-zone maths in the browser.
+- **`from` and `to` are local Helsinki dates**, `yyyy-MM-dd` only, both inclusive. A bad format, a missing value, `to` before `from`, or a year outside 0002–9998 returns `400` with the parameter name as the error key (`from`/`to`).
+- **370 days = 370 calendar days counting both ends** (`to - from + 1 <= 370`). So 2027-01-01..2028-01-05 passes and ..2028-01-06 returns `400` on `to`. This is the reading of "max range: 370 days" that is easiest to check; the other reading (`to - from <= 370`) would allow one more day.
+- **What counts as in range:** a timed single event when its instants overlap the local-day range (`start < end of to` and `end > start of from`, so an event that ends exactly at 00:00 on `from` is not in range); an all-day event when its date span overlaps (a multi-day event starting before `from` is returned with its full span); a recurring event once per occurrence date from `RecurrenceEngine` (a timed occurrence is on one local day, so `startDate == endDate`).
+- **Recurring times** come from the occurrence date plus `StartLocalTime`/`EndLocalTime` through `HelsinkiTime.ToUtc`, so 10:00 stays 10:00 local across DST and a start in the gap moves to the next valid time.
+- **One query, then pure expansion.** SQL narrows the rows by owner and kind-specific range predicates (uses the `(OwnerId, StartUtc)` and `(OwnerId, StartDate)` indexes); `ListOccurrencesHandler.Expand` applies the exact rules in memory and is unit-tested without a database. Only counts are logged.
+- **No paging or result cap.** The range cap bounds the work; the result is whatever one owner's events expand to.
+- **Fix found on the way (GetEvent):** `GET /api/events/{id}` returned `startUtc`/`endUtc`/`createdAtUtc`/`updatedAtUtc` without a `Z` when read from SQL Server (the `DateTime` kind is unspecified there), unlike the `POST` response. They are now marked UTC; `GetEventTests` asserts it.
 
 ## Steps (done)
 
-1. `Features/Events/DeleteEvent/`: `DeleteEventHandler`, `DeleteEventEndpoint` (`MapDeleteEvent`), wired in `Program.cs`. No request type or validator: the only input is the route id.
-2. Integration tests in `tests/CalendarPlaybook.Api.IntegrationTests/Features/Events/DeleteEvent/DeleteEventTests.cs`: `204` and the event is gone (`GET` returns `404`), recurring series removed while another event survives, second delete returns `404`, foreign and unknown ids return `404` with the owner's row intact, non-GUID id returns `404`, six `401` token cases.
+1. `Features/Events/ListOccurrences/`: `ListOccurrencesItem`, `ListOccurrencesQuery` (parse + validation), `ListOccurrencesHandler` (`HandleAsync`, `Expand`), `ListOccurrencesEndpoint` (`MapListOccurrences`), wired in `Program.cs`.
+2. Unit tests in `tests/CalendarPlaybook.Api.Tests/Features/Events/ListOccurrences/`: query parsing and the 370/371 boundary; `Expand` for single (UTC marked, Helsinki day boundary, end at midnight), all-day overlap, weekly with inclusive until date, DST wall-clock and gap, month-day 31 overflow, every-N-days, Feb 29, series outside the range, ordering.
+3. Integration tests in `tests/CalendarPlaybook.Api.IntegrationTests/Features/Events/ListOccurrences/ListOccurrencesTests.cs`: all three kinds with UTC and local dates and order, inclusive range ends, update and delete reflected in the listing, owner isolation, 370/371 days, six invalid-query cases, six `401` token cases.
+4. GetEvent `Z` fix with an assertion in `GetEventTests`.
 
 ## Verification
 
@@ -22,10 +30,11 @@
 
 ## Open points
 
-- Next slices: `ListOccurrences` (`GET /api/events?from&to`, 370-day limit, recurrence expansion via `Recurrence/`), `Notifications/ListUpcoming`.
-- Extract the shared request/validator/mapping that `UpdateEvent` borrows from `CreateEvent` and `GetEvent` (`Features/Events/Shared/` or `Infrastructure/Events/`).
+- Propose spec wording for §9 (needs your approval; `intent/` edits ask for confirmation): item shape (bare array, local `startDate`/`endDate` on every item), ordering, `from`/`to` as local inclusive dates, "370 days counting both ends", and `401` for a token without `sub`.
+- Performance row (§12, p95 under 300 ms for a 42-day range) is not measured yet; the integration project has no timing test.
+- Next slice: `Notifications/ListUpcoming` (`GET /api/notifications?horizonHours=24`, max 48; all-day events notify at 00:00 Helsinki on their start date; spec §7). It can reuse `ListOccurrencesHandler.Expand` after extracting it to a shared place.
+- Extract the shared request/validator/mapping that `UpdateEvent` borrows from `CreateEvent` and `GetEvent` (`Features/Events/Shared/` or `Infrastructure/Events/`), together with the expansion above.
 - No optimistic concurrency on `PUT` (last write wins); raise with the product owner if wanted.
 - CI: set `CALENDAR_INTEGRATION_REQUIRED=true` and make Podman available when the pipeline is set up.
-- Spec §3 does not say that a token without `sub` returns `401` (implemented in `AuthSetup`); consider a line there (`intent/` edits need your approval).
 - CORS: add once the SPA origin is known.
 - `System.Security.Cryptography.Pkcs` is pinned to 10.0.14 to override a vulnerable transitive 9.0.11 from SqlClient. Drop the pin once SqlClient brings a patched version.

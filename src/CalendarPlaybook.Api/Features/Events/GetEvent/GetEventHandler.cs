@@ -48,11 +48,14 @@ public static class GetEventHandler
             startTime,
             endDate,
             endTime,
-            entity.StartUtc,
-            entity.EndUtc,
+            AsUtc(entity.StartUtc),
+            AsUtc(entity.EndUtc),
             entity.TimeZone,
             recurrence,
-            entity.CreatedAtUtc,
-            entity.UpdatedAtUtc);
+            DateTime.SpecifyKind(entity.CreatedAtUtc, DateTimeKind.Utc),
+            DateTime.SpecifyKind(entity.UpdatedAtUtc, DateTimeKind.Utc));
     }
+
+    // Rows read from SQL Server have an unspecified kind; marking them UTC makes them serialize with a Z.
+    private static DateTime? AsUtc(DateTime? value) => value is { } v ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : null;
 }

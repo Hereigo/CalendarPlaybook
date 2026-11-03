@@ -9,7 +9,7 @@ Read the spec section that matches your task before changing behaviour.
 - `global.json` pins the .NET SDK to 10.0.403 or later patch. Earlier SDKs are not supported.
 - `src/CalendarPlaybook.Api/` - .NET 10 Minimal API, Vertical Slices. `Program.cs` wires problem details, string enums, Auth0 and the `/api/events` group.
   - `Recurrence/` - pure domain logic (engine, `HelsinkiTime` local↔UTC). No EF Core or HTTP references. Keep it that way.
-  - `Features/` (spec §9.1) - one folder per slice. Done: `Events/CreateEvent`, `Events/GetEvent`, `Events/UpdateEvent`, `Events/DeleteEvent`. Next: `ListOccurrences`, `Notifications/ListUpcoming`.
+  - `Features/` (spec §9.1) - one folder per slice. Done: `Events/CreateEvent`, `Events/GetEvent`, `Events/UpdateEvent`, `Events/DeleteEvent`, `Events/ListOccurrences`. Next: `Notifications/ListUpcoming`.
   - `Infrastructure/` (spec §9.1) - `CalendarDbContext`, `Events/` (entity, enums, configuration), `Auth/` (JWT, `GetOwnerId()`), `Database/`, `Migrations/` (SQL Server only).
 - Local SQL Server 2022 Express in Podman, two options (use one, both bind port 1433). Both need `MSSQL_SA_PASSWORD` in the environment or `.env` (template: `.env_example`).
   - `podman run ... --name calendar-sql` from `docs/podman-sql-notes.md`. In Development the app runs `podman start calendar-sql` on startup (`DevSqlContainer:Name` in `appsettings.Development.json`) and waits until SQL Server accepts connections.
