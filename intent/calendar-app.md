@@ -24,7 +24,7 @@ Calendar app with authorization and ability to add, update, delete different typ
     - ../docs/ui-template/Calendar.css
 - Backend (.NET 10): new project, Minimal API, Vertical Slices architectural pattern, EF Core with SQL Server.
 - Data: EF Core with SQL Server. Local development runs SQL Server in a Podman container; production runs SQL Server.
-- External: Auth0 auth provider.
+- External: cidaas auth provider (OpenID Connect, https://docs.cidaas.com/).
 
 ## Calendar scope
 
@@ -41,7 +41,7 @@ Calendar app with authorization and ability to add, update, delete different typ
 
 - Platform: React frontend, .NET 10 backend, SQL Server db (Podman for development, SQL Server for production)
 - .NET SDK: 10.0.403 or later. Earlier SDKs are not supported.
-- Security and compliance: Auth0 provider and modern security best practices for web apps. Data retention: indefinite. No GDPR requirements.
+- Security and compliance: cidaas provider and modern security best practices for web apps. Data retention: indefinite. No GDPR requirements.
 - Performance: API p95 under 300 ms for a 42-day range on a single user's data
 - Accessibility: WCAG 2.1 AA for the UI
 - Deadline or release window: not yet intended

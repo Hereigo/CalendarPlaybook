@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
-builder.Services.AddAuth0(builder.Configuration);
+builder.Services.AddCidaas(builder.Configuration);
 builder.Services.AddCalendarDb(builder.Configuration);
 
 var spaOrigin = builder.Configuration["Cors:AllowedOrigin"];

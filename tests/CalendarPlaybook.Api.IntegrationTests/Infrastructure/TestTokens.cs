@@ -7,21 +7,21 @@ using Microsoft.IdentityModel.Tokens;
 namespace CalendarPlaybook.Api.IntegrationTests.Infrastructure;
 
 /// <summary>
-/// Stands in for Auth0 (spec section 12): a locally generated RSA key, published as a JWKS in a static OpenID
+/// Stands in for cidaas (spec section 12): a locally generated RSA key, published as a JWKS in a static OpenID
 /// configuration, and tokens signed with it. JwtBearer still validates issuer, audience, signature and lifetime.
 /// </summary>
 public static class TestTokens
 {
-    public const string Domain = "calendar-test.auth0.test";
+    public const string BaseUrl = "https://calendar-test.cidaas.test";
     public const string Audience = "https://calendar-api.test";
-    public const string Issuer = $"https://{Domain}/";
+    public const string Issuer = BaseUrl;
 
     private static readonly SecurityKey SigningKey = CreateKey("test-signing-key");
 
     /// <summary>A key the API does not know: tokens signed with it must be rejected.</summary>
     public static readonly SecurityKey ForeignKey = CreateKey("foreign-key");
 
-    /// <summary>What JwtBearer would fetch from <c>https://{Domain}/.well-known/openid-configuration</c> and its JWKS.</summary>
+    /// <summary>What JwtBearer would fetch from <c>{BaseUrl}/.well-known/openid-configuration</c> and its JWKS.</summary>
     public static readonly OpenIdConnectConfiguration OpenIdConfiguration = CreateOpenIdConfiguration();
 
     public static string Create(
@@ -52,7 +52,7 @@ public static class TestTokens
 
     private static OpenIdConnectConfiguration CreateOpenIdConfiguration()
     {
-        // Round-trip the public key through JWKS JSON, as Auth0 serves it.
+        // Round-trip the public key through JWKS JSON, as cidaas serves it.
         var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey((RsaSecurityKey)SigningKey);
         var publicJwk = new JsonWebKey { Kty = jwk.Kty, Kid = jwk.Kid, Use = "sig", Alg = SecurityAlgorithms.RsaSha256, N = jwk.N, E = jwk.E };
         var jwks = new JsonWebKeySet($$"""{"keys":[{{System.Text.Json.JsonSerializer.Serialize(publicJwk)}}]}""");

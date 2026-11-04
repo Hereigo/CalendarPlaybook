@@ -7,7 +7,7 @@ public class Event
 {
     public Guid Id { get; set; }
 
-    /// <summary>Auth0 <c>sub</c> of the owner.</summary>
+    /// <summary>cidaas <c>sub</c> of the owner.</summary>
     public string OwnerId { get; set; } = "";
 
     public string Title { get; set; } = "";

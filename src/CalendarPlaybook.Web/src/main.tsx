@@ -1,21 +1,15 @@
-import { Auth0Provider } from '@auth0/auth0-react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { AuthProvider } from 'react-oidc-context';
 import App from './App';
+import { oidcSettings, removeSigninParams } from './auth';
 import './fonts.css';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Auth0Provider
-      domain={import.meta.env.VITE_AUTH0_DOMAIN}
-      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
-      authorizationParams={{
-        redirect_uri: window.location.origin,
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-      }}
-    >
+    <AuthProvider {...oidcSettings} onSigninCallback={removeSigninParams}>
       <App />
-    </Auth0Provider>
+    </AuthProvider>
   </StrictMode>,
 );

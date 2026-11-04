@@ -13,7 +13,7 @@ A single-user-role calendar web app. Each signed-in user creates, views, updates
 
 **Goals**
 
-1. Users sign in with Auth0 and see only their own events.
+1. Users sign in with cidaas and see only their own events.
 2. Users manage single, all-day and recurring events, including the four recurrence rules in section 5.
 3. Reminders are delivered at event start while the app is in use.
 4. The app is deployed to production.
@@ -32,7 +32,7 @@ A single-user-role calendar web app. Each signed-in user creates, views, updates
 ## 3. Users and access
 
 - One role: user. All users are equal. There are no admin users.
-- Authentication is delegated to Auth0. The frontend uses Auth0's SPA login flow (Authorization Code with PKCE). The backend validates the Auth0 access token (issuer, audience, signature, expiry) on every API call.
+- Authentication is delegated to cidaas (OpenID Connect). The frontend uses the OIDC Authorization Code flow with PKCE (`oidc-client-ts`). The backend validates the cidaas access token (issuer, audience, signature, expiry; keys from the tenant's discovery document) on every API call. The audience is configurable: the SPA client id by default, or an API resource URI (RFC 8707).
 - The user's identity is the token `sub` claim. Every event stores its `OwnerId` = `sub`.
 - Every query and command filters by `OwnerId` on the server. A user who requests another user's event id gets `404`, not `403`, so ids are not confirmed to exist.
 
@@ -101,7 +101,7 @@ Each shifted occurrence still counts as one occurrence. It is not skipped. The r
 
 | ID | Requirement |
 |---|---|
-| FR-1 | User signs in through Auth0 and is redirected back to the calendar. |
+| FR-1 | User signs in through cidaas and is redirected back to the calendar. |
 | FR-2 | User sees a month view with navigation to previous and next month and a "today" marker (from ui-template). |
 | FR-3 | Month view shows all occurrences (single, all-day, recurring) for the visible range. |
 | FR-4 | User creates a single, all-day, or recurring event from a form. |
@@ -112,7 +112,7 @@ Each shifted occurrence still counts as one occurrence. It is not skipped. The r
 
 ## 9. API (Minimal API, Vertical Slices)
 
-Base path: `/api`. All endpoints require a valid Auth0 bearer token.
+Base path: `/api`. All endpoints require a valid cidaas bearer token.
 
 | Method | Path | Purpose |
 |---|---|---|
@@ -142,7 +142,7 @@ Features/
   Notifications/
     ListUpcoming/
 Recurrence/          (pure domain logic, no EF or HTTP references)
-Infrastructure/      (EF Core DbContext, Auth0 config, migrations)
+Infrastructure/      (EF Core DbContext, cidaas config, migrations)
 ```
 
 The recurrence engine lives in `Recurrence/` and has no dependency on EF Core or HTTP. This makes it testable in isolation (section 12).
@@ -156,7 +156,7 @@ SQL Server 2022 Express via EF Core. Local development runs SQL Server 2022 Expr
 | Column | Type | Notes |
 |---|---|---|
 | Id | uniqueidentifier | PK |
-| OwnerId | nvarchar(255) | Auth0 `sub`. Indexed. |
+| OwnerId | nvarchar(255) | cidaas `sub`. Indexed. |
 | Title | nvarchar(200) | 1–200 chars |
 | Description | nvarchar(4000) NULL | up to 4000 chars |
 | Kind | nvarchar(16) | `Single`, `AllDay`, `Recurring` |
@@ -184,13 +184,13 @@ Migrations are EF Core migrations, applied on startup in development (against th
 
 ## 11. Security
 
-- Auth0 access tokens only. No tokens in local storage. The SPA keeps tokens in memory with Auth0's SDK.
+- cidaas access tokens only. No tokens in local storage. The SPA keeps tokens in memory (`oidc-client-ts` with an in-memory user store).
 - The backend enforces `OwnerId` on every query and command. The frontend is not trusted.
 - Input validation on all DTOs. Title and description length limits. Date ranges limited (section 9).
 - EF Core parameterized queries only. No raw SQL built from input.
 - HTTPS only. HSTS on. CORS allows only the SPA origin.
 - Logs do not contain event titles or descriptions.
-- Secrets (Auth0 client secret if used, connection strings) come from environment or secret store. Not committed. The local Podman SQL Server `sa` password is also kept out of the repo (environment variable or .NET user secrets).
+- Secrets (cidaas client secret if used, connection strings) come from environment or secret store. Not committed. The local Podman SQL Server `sa` password is also kept out of the repo (environment variable or .NET user secrets).
 - Dependency updates and a vulnerability scan run in CI.
 
 ## 12. Test plan
@@ -208,7 +208,7 @@ The Test stage requires a verification command to pass before the work is report
 | Performance | API latency | `GET /api/events` over a 42-day range against SQL Server in Podman, with a single user's typical data set. Fails the build if p95 is 300 ms or more. |
 | Accessibility | UI, WCAG 2.1 AA | Automated scan (axe or equivalent) of the month view, event form, and delete confirmation. Zero violations. Keyboard-only run of create, edit, delete and sign-out. |
 
-Auth0 is mocked in integration tests with a locally generated JWKS.
+cidaas is mocked in integration tests with a locally generated JWKS.
 
 ## 13. Decisions taken in this spec (for product owner review)
 
@@ -242,7 +242,7 @@ These were not explicit in the intent. Each is a reasonable default and is easy 
 
 Each criterion maps to a test in section 12.
 
-1. A signed-out user is redirected to Auth0 login. An API call without a token returns 401.
+1. A signed-out user is redirected to cidaas login. An API call without a token returns 401.
 2. A user creates a single timed event and sees it on the correct local day in month view.
 3. A user creates an all-day event spanning three days and sees it on each of those days.
 4. A user creates "every 3 days" from 1 March until 31 March. The occurrences are 1, 4, 7, … 31 March.
@@ -274,6 +274,6 @@ Each criterion maps to a test in section 12.
 | In-app and browser notifications at start | 7 |
 | React frontend from ui-template | 8 (FR-2), 13 |
 | .NET 10, Minimal API, Vertical Slices, EF Core with SQL Server | 9, 9.1, 10, 13 (decision 9) |
-| Auth0 | 3, 11 |
+| cidaas | 3, 11 |
 | Indefinite retention, no GDPR | 2 (non-goals) |
 | Deployed to production | 15, 14 |

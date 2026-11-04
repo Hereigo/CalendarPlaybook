@@ -13,7 +13,7 @@ namespace CalendarPlaybook.Api.IntegrationTests.Infrastructure;
 /// </summary>
 public abstract class IntegrationTest(SqlServerFixture fixture)
 {
-    protected static string NewSub() => $"auth0|{Guid.NewGuid():N}";
+    protected static string NewSub() => Guid.NewGuid().ToString();
 
     /// <summary>A client that sends <paramref name="token"/> as bearer token, or no Authorization header when null.</summary>
     protected HttpClient CreateClient(string? token)
