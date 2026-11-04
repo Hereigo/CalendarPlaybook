@@ -29,14 +29,16 @@ Auth0 is gone from the solution and cidaas sign-in replaces it. All automated ch
    - redirect and post-logout URI `http://localhost:5173`
    - silent redirect URI `http://localhost:5173/silent-renew.html`
    - allowed origin `http://localhost:5173`
+
 2. Your local `.env` and `src/CalendarPlaybook.Web/.env.local` still have the old `VITE_AUTH0_*` values. I didn't touch them because they hold your own settings; switch them to the `VITE_CIDAAS_*` names.
+
 3. Replace the Auth0 user secrets:
-   ```bash
-   dotnet user-secrets set Cidaas:BaseUrl "https://<tenant>.cidaas.eu" --project src/CalendarPlaybook.Api
-   ```
-   ```bash
-   dotnet user-secrets set Cidaas:Audience "<spa-client-id>" --project src/CalendarPlaybook.Api
-   ```
+```sh
+dotnet user-secrets set Cidaas:BaseUrl "https://<tenant>.cidaas.eu" --project src/CalendarPlaybook.Api
+```
+```sh
+dotnet user-secrets set Cidaas:Audience "<spa-client-id>" --project src/CalendarPlaybook.Api
+```
 4. Sign in once and check that the token's `iss` and `aud` match these two settings.
 
 Events created under Auth0 users won't show up for cidaas users, because their owner ids differ. That only affects local test data, so I didn't migrate it.
