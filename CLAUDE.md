@@ -11,7 +11,7 @@ Read the spec section that matches your task before changing behaviour.
   - `Recurrence/` - pure domain logic (engine, `HelsinkiTime` local↔UTC). No EF Core or HTTP references. Keep it that way.
   - `Features/` (spec §9.1) - one folder per slice. Done: `Events/CreateEvent`, `Events/GetEvent`, `Events/UpdateEvent`, `Events/DeleteEvent`, `Events/ListOccurrences`. Next: `Notifications/ListUpcoming`.
   - `Infrastructure/` (spec §9.1) - `CalendarDbContext`, `Events/` (entity, enums, configuration), `Auth/` (JWT, `GetOwnerId()`), `Database/`, `Migrations/` (SQL Server only).
-- Local SQL Server 2022 Express in Podman, two options (use one, both bind port 1433). Both need `MSSQL_SA_PASSWORD` in the environment or `.env` (template: `.env_example`).
+- Local SQL Server 2022 Express in Podman, two options (use one, both bind port 1433). Both need `MSSQL_SA_PASSWORD` in the environment or `.env` (template: `.env.example` in the repo root).
   - `podman run ... --name calendar-sql` from `docs/podman-sql-notes.md`. In Development the app runs `podman start calendar-sql` on startup (`DevSqlContainer:Name` in `appsettings.Development.json`) and waits until SQL Server accepts connections.
   - `compose.yaml` (`podman compose up -d`). Its container has a different name, so the app does not start it; start it yourself.
 - In Development `dotnet run --project src/CalendarPlaybook.Api` also starts the Vite dev server (`npm run dev` in `DevWebServer:Path`, `Infrastructure/DevWebServer.cs`) and stops it on shutdown. Run `npm install` in `src/CalendarPlaybook.Web` once first. The launch profiles open `http://localhost:5173`.

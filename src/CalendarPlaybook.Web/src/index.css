@@ -377,5 +377,5 @@ input {
     border: 1px solid var(--border);
     background: #fff;
     border-radius: 5px;
-    padding: 0 0.7rem;
+    padding: 0.5rem 0.7rem;
 }
