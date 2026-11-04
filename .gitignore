@@ -427,3 +427,4 @@ FodyWeavers.xsd
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
 .env.local
+docs/Auth0-howto.md
