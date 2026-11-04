@@ -23,16 +23,21 @@ How to run the calendar web app on your machine. The app is built with .NET foll
 dotnet user-secrets set ConnectionStrings:Calendar "Server=localhost,1433;Database=Calendar;User Id=sa;Password=<password>;TrustServerCertificate=True" --project src/CalendarPlaybook.Api
 dotnet user-secrets set Auth0:Domain "<your-tenant>.auth0.com" --project src/CalendarPlaybook.Api
 dotnet user-secrets set Auth0:Audience "<api-identifier>" --project src/CalendarPlaybook.Api
+dotnet user-secrets set Cors:AllowedOrigin "http://localhost:5173" --project src/CalendarPlaybook.Api
 
 # to watch
 dotnet user-secrets list --project src/CalendarPlaybook.Api
 ```
 
-3. Run the API. In Development, it applies migrations on startup:
+3. Set up the frontend once. In `src/CalendarPlaybook.Web`, run `npm install`, then copy `.env.example` to `.env.local` and fill in `VITE_AUTH0_DOMAIN`, `VITE_AUTH0_CLIENT_ID`, `VITE_AUTH0_AUDIENCE` (from the Auth0 SPA application) and `VITE_API_URL`.
+
+4. Run the app. In Development, it applies migrations on startup, starts the Vite dev server and opens `http://localhost:5173`:
 
 ```sh
 dotnet run --project src/CalendarPlaybook.Api
 ```
+
+Frontend checks (in `src/CalendarPlaybook.Web`): `npm test` and `npm run build`.
 
 ## Tests
 
@@ -62,6 +67,6 @@ or put `docker.host=npipe://./pipe/podman-machine-default` in `%USERPROFILE%\.te
 
 ### Without Podman
 
-If no Podman/Docker endpoint is reachable, the integration tests are **skipped** with the message "Podman/Docker is not reachable…", and `dotnet test` still exits 0 (the summary shows `Skipped: 14` for the integration project). Start the machine with `podman machine start` and run again. Other failures (image pull, migration, SQL errors) fail the run.
+If no Podman/Docker endpoint is reachable, the integration tests are **skipped** with the message "Podman/Docker is not reachable…", and `dotnet test` still exits 0 (check the summary for a non-zero `Skipped` count on the integration project). Start the machine with `podman machine start` and run again. Other failures (image pull, migration, SQL errors) fail the run.
 
 In CI, set `CALENDAR_INTEGRATION_REQUIRED=true` so that a missing endpoint fails the run instead of skipping (spec §12).

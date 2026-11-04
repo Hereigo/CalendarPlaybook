@@ -36,5 +36,4 @@ The spec leaves these open; each is a default, none changes a §13 decision. Pro
 - Extract the shared request/validator/mapping that `UpdateEvent` borrows from `CreateEvent` and `GetEvent` (`Features/Events/Shared/` or `Infrastructure/Events/`), together with the expansion above.
 - No optimistic concurrency on `PUT` (last write wins); raise with the product owner if wanted.
 - CI: set `CALENDAR_INTEGRATION_REQUIRED=true` and make Podman available when the pipeline is set up.
-- CORS: add once the SPA origin is known.
 - `System.Security.Cryptography.Pkcs` is pinned to 10.0.14 to override a vulnerable transitive 9.0.11 from SqlClient. Drop the pin once SqlClient brings a patched version.
