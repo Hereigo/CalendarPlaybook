@@ -428,3 +428,4 @@ FodyWeavers.xsd
 #*.lscache
 .env.local
 docs/Auth0-howto.md
+DATA_FROM_OLD_PROJECT/

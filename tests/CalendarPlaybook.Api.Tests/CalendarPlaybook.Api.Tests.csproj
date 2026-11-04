@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CalendarPlaybook.Api\CalendarPlaybook.Api.csproj" />
+    <ProjectReference Include="..\..\tools\CalendarPlaybook.LegacyImport\CalendarPlaybook.LegacyImport.csproj" />
   </ItemGroup>
 
 </Project>

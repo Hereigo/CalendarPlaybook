@@ -1,3 +1,9 @@
+# Side task (done): legacy Calendarium data import
+
+- `tools/CalendarPlaybook.LegacyImport`: a one-off console tool that imports `DATA_FROM_OLD_PROJECT/database_backup.json` (124 rows, git-ignored) into `Events` for one owner `sub`. It is a data migration, **not** the user-facing import that spec §1 keeps out of scope. The spec is unchanged.
+- Mapping defaults (agreed with the user): `Once` → Single/AllDay, `Yearly` → YearDay, `Monthly` → MonthDay, `EveryXdays` → EveryDays, all anchored on the old `Started` date. Old time 00:00/00:01 → all-day; other times → timed, end = start + 1 h (capped 23:59). `UntilDate = 2099-12-31`. Old description → title. Stray `EveryXDays` on non-interval rows is ignored with a warning.
+- Unit tests: `tests/CalendarPlaybook.Api.Tests/LegacyImport/`. Dry run against the backup: 124 would import, 0 invalid.
+
 # Plan: ListOccurrences slice (`GET /api/events?from=&to=`)
 
 - **Spec:** `intent/calendar-app-spec.md` §9 (`GET /api/events?from=YYYY-MM-DD&to=YYYY-MM-DD` returns expanded occurrences, range inclusive, each item has `eventId`, `occurrenceStartUtc`, `occurrenceEndUtc` or dates for all-day, `kind`, `title`, max range 370 days), §5 (rules, month/day overflow, generation), §5.4 and §6 (wall-clock times per occurrence, DST gap and repeated hour), §10 (columns, indexes), §11 (owner enforcement, no titles in logs), §12 (range-limit integration row).
