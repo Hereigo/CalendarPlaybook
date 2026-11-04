@@ -16,10 +16,10 @@ public sealed class CalendarApiFactory(string connectionString) : WebApplication
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:Calendar", connectionString);
-        builder.UseSetting("Cidaas:BaseUrl", TestTokens.BaseUrl);
-        builder.UseSetting("Cidaas:Audience", TestTokens.Audience);
+        builder.UseSetting("Auth0:Domain", TestTokens.Domain);
+        builder.UseSetting("Auth0:Audience", TestTokens.Audience);
 
-        // A static configuration replaces the metadata download from cidaas; validation itself is unchanged.
+        // A static configuration replaces the metadata download from Auth0; validation itself is unchanged.
         builder.ConfigureTestServices(services =>
             services.Configure<JwtBearerOptions>(
                 JwtBearerDefaults.AuthenticationScheme,

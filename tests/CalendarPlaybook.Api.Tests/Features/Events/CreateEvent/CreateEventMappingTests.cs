@@ -5,7 +5,7 @@ namespace CalendarPlaybook.Api.Tests.Features.Events.CreateEvent;
 
 public class CreateEventMappingTests
 {
-    private const string OwnerId = "owner-sub";
+    private const string OwnerId = "auth0|owner";
 
     private static readonly DateTime Now = new DateTime(2027, 1, 10, 12, 0, 0, 123, DateTimeKind.Utc).AddTicks(4567);
 

@@ -21,14 +21,12 @@ How to run the calendar web app on your machine. The app is built with .NET foll
 
 ```sh
 dotnet user-secrets set ConnectionStrings:Calendar "Server=localhost,1433;Database=Calendar;User Id=sa;Password=<password>;TrustServerCertificate=True" --project src/CalendarPlaybook.Api
-dotnet user-secrets set Cidaas:BaseUrl "https://<your-tenant>.cidaas.eu" --project src/CalendarPlaybook.Api
-dotnet user-secrets set Cidaas:Audience "<spa-client-id or resource URI>" --project src/CalendarPlaybook.Api
+dotnet user-secrets set Auth0:Domain "<your-tenant>.auth0.com" --project src/CalendarPlaybook.Api
+dotnet user-secrets set Auth0:Audience "<api-identifier>" --project src/CalendarPlaybook.Api
 
 # to watch
 dotnet user-secrets list --project src/CalendarPlaybook.Api
 ```
-
-cidaas tenant: create a single-page (public) client with Authorization Code + PKCE. Redirect and post-logout URI `http://localhost:5173`, silent redirect URI `http://localhost:5173/silent-renew.html`, allowed web origin `http://localhost:5173`. `Cidaas:Audience` must equal the access token `aud` (the client id, unless you use a resource indicator). Put the same tenant URL and client id in `src/CalendarPlaybook.Web/.env.local` (template `.env.example`).
 
 3. Run the API. In Development, it applies migrations on startup:
 
@@ -45,7 +43,7 @@ dotnet test
 This runs both test projects:
 
 - `tests/CalendarPlaybook.Api.Tests`: unit tests, no dependencies.
-- `tests/CalendarPlaybook.Api.IntegrationTests`: the API over HTTP against a real SQL Server 2022 Express that Testcontainers starts in Podman for each run (about 35 s, removed afterwards). cidaas is replaced by a locally generated signing key (JWKS); no cidaas tenant or user secrets are used.
+- `tests/CalendarPlaybook.Api.IntegrationTests`: the API over HTTP against a real SQL Server 2022 Express that Testcontainers starts in Podman for each run (about 35 s, removed afterwards). Auth0 is replaced by a locally generated signing key (JWKS); no Auth0 tenant or user secrets are used.
 
 ### Podman as the Testcontainers endpoint (Windows)
 

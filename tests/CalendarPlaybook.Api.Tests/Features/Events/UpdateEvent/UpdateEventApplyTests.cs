@@ -11,7 +11,7 @@ public class UpdateEventApplyTests
     private static Event RecurringEvent() => new()
     {
         Id = Guid.NewGuid(),
-        OwnerId = "owner-sub",
+        OwnerId = "auth0|owner",
         Title = "Weekly",
         Description = "Old",
         Kind = EventKind.Recurring,
@@ -61,7 +61,7 @@ public class UpdateEventApplyTests
         UpdateEventHandler.Apply(entity, request, Now);
 
         Assert.Equal(id, entity.Id);
-        Assert.Equal("owner-sub", entity.OwnerId);
+        Assert.Equal("auth0|owner", entity.OwnerId);
         Assert.Equal(Created, entity.CreatedAtUtc);
         Assert.Equal(new DateTime(2027, 2, 1, 8, 0, 0, 123, DateTimeKind.Utc), entity.UpdatedAtUtc);
         Assert.Equal(RuleType.EveryDays, entity.RuleType);

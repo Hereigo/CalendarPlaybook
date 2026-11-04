@@ -1,26 +1,4 @@
-# Plan: replace Auth0 with cidaas
-
-- **Spec:** `intent/calendar-app-spec.md` §1, §3, FR-1, §9, §9.1, §10, §11, §12, acceptance, traceability; `intent/calendar-app.md` (external provider, security). Requested by the user; no §13 decision affected.
-- **Status:** implemented. Needs a manual sign-in check against a real cidaas tenant.
-
-## Decisions
-
-- **API:** JwtBearer with `Authority = Cidaas:BaseUrl` (tenant URL; issuer and JWKS from its discovery document) and `Audience = Cidaas:Audience`. cidaas puts the client id in `aud` by default; set `Cidaas:Audience` to an API resource URI if Resource Indicators (RFC 8707) are configured. `sub` is still the owner id, a token without `sub` is `401`.
-- **SPA:** `oidc-client-ts` + `react-oidc-context` (Authorization Code + PKCE), in-memory user store (spec §11), silent renew through `silent-renew.html` (second Vite entry). Config: `VITE_CIDAAS_BASE_URL`, `VITE_CIDAAS_CLIENT_ID`, optional `VITE_CIDAAS_RESOURCE`.
-- **Data:** no migration. Events created under Auth0 (`auth0|...` owners) are not visible to cidaas users (local dev data only).
-
-## Verification
-
-`dotnet test` from the repo root; `npm test` and `npm run build` in `src/CalendarPlaybook.Web`.
-
-## Open points
-
-- cidaas tenant setup: SPA client with PKCE, redirect and post-logout URIs `http://localhost:5173`, silent redirect `http://localhost:5173/silent-renew.html`, allowed web origin `http://localhost:5173`.
-- Confirm the access token `aud` and `iss` from a real tenant token match `Cidaas:Audience` and `Cidaas:BaseUrl`.
-
----
-
-# Previous plan: ListOccurrences slice (`GET /api/events?from=&to=`)
+# Plan: ListOccurrences slice (`GET /api/events?from=&to=`)
 
 - **Spec:** `intent/calendar-app-spec.md` §9 (`GET /api/events?from=YYYY-MM-DD&to=YYYY-MM-DD` returns expanded occurrences, range inclusive, each item has `eventId`, `occurrenceStartUtc`, `occurrenceEndUtc` or dates for all-day, `kind`, `title`, max range 370 days), §5 (rules, month/day overflow, generation), §5.4 and §6 (wall-clock times per occurrence, DST gap and repeated hour), §10 (columns, indexes), §11 (owner enforcement, no titles in logs), §12 (range-limit integration row).
 - **Status:** implemented. `dotnet test` from the repo root with Podman up: 125 unit + 67 integration tests passed, 0 skipped.

@@ -39,7 +39,7 @@ if (configFile) {
   const text = [toolInput.content, toolInput.new_string].filter(Boolean).join("\n");
   const secret = /(password|pwd|client_?secret|sa_password|mssql_sa_password)\s*["']?\s*[:=]\s*["']?(?!\$\{|\$\(|<|["']?\s*$)[^\s"';,]{3,}/i;
   if (secret.test(text)) {
-    decide("deny", `${rel} would contain a secret. Secrets (connection-string passwords, cidaas secrets, sa password) come from environment variables or user secrets, never committed files.`);
+    decide("deny", `${rel} would contain a secret. Secrets (connection-string passwords, Auth0 secrets, sa password) come from environment variables or user secrets, never committed files.`);
   }
 }
 

@@ -171,7 +171,7 @@ public class ListOccurrencesTests(SqlServerFixture fixture) : IntegrationTest(fi
             "none" => null,
             "foreign key" => TestTokens.Create(sub, key: TestTokens.ForeignKey),
             "wrong audience" => TestTokens.Create(sub, audience: "https://another-api.test"),
-            "wrong issuer" => TestTokens.Create(sub, issuer: "https://another-tenant.cidaas.test"),
+            "wrong issuer" => TestTokens.Create(sub, issuer: "https://another-tenant.auth0.test/"),
             "expired" => TestTokens.Create(sub, expiresUtc: DateTime.UtcNow.AddMinutes(-10)),
             "no sub" => TestTokens.Create(sub: null),
             _ => throw new ArgumentOutOfRangeException(nameof(token)),

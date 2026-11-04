@@ -10,7 +10,7 @@ public class GetEventMappingTests
     private static Event NewEvent(EventKind kind) => new()
     {
         Id = Guid.NewGuid(),
-        OwnerId = "owner-sub",
+        OwnerId = "auth0|owner",
         Title = "Title",
         Kind = kind,
         TimeZone = "Europe/Helsinki",

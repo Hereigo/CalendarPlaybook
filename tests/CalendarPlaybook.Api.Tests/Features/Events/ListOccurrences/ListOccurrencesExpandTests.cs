@@ -8,7 +8,7 @@ public class ListOccurrencesExpandTests
     private static Event NewEvent(EventKind kind, string title = "Title") => new()
     {
         Id = Guid.NewGuid(),
-        OwnerId = "owner-sub",
+        OwnerId = "auth0|owner",
         Title = title,
         Kind = kind,
         TimeZone = "Europe/Helsinki",
