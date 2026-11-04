@@ -85,13 +85,12 @@ export default function Calendar({ api, onSignOut }: Props) {
   return (
     <div className="page">
       <header className="site-header">
-        <h1>Calendar</h1>
         <nav className="month-nav">
           <button type="button" aria-label="Previous month" onClick={() => shift(-1)}>←</button>
           <span id="monthLabel" className="month-label">{label}</span>
           <button type="button" aria-label="Next month" onClick={() => shift(1)}>→</button>
-          {onSignOut && <button type="button" onClick={onSignOut}>Sign out</button>}
         </nav>
+        {onSignOut && <button type="button" onClick={onSignOut}>Sign out</button>}
       </header>
       <aside className="sidebar">
         <h2>Upcoming</h2>

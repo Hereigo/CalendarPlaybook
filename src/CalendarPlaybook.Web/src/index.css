@@ -72,17 +72,19 @@ input {
     gap: 0.5rem;
 }
 
-.month-nav button {
+.month-nav button,
+.site-header > button {
     cursor: pointer;
     border: 1px solid var(--border);
     background: #fff;
     border-radius: 5px;
-    padding: 0 0.3rem;
-    font-size: 1.1rem;
+    padding: 0.5rem 0.7rem;
+    font-size: 1rem;
     line-height: 1.2;
 }
 
-.month-nav button:hover {
+.month-nav button:hover,
+.site-header > button:hover {
     border-color: var(--accent);
     color: var(--accent);
 }
@@ -90,6 +92,7 @@ input {
 .month-label {
     min-width: 11ch;
     text-align: center;
+    white-space: nowrap;
     font-weight: 600;
     font-size: 1.1rem;
 }
@@ -169,16 +172,29 @@ input {
 }
 
 .calendar .day.outside {
+    background: #f6f7f9;
     cursor: default;
+}
+
+.calendar .day.outside .event {
+    background: #f6f7f9;
 }
 
 .calendar .day .num {
     font-size: 0.85rem;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
+    color: var(--accent);
 }
 
 .calendar .day.outside .num {
     color: var(--muted);
+}
+
+/* Weekends: the grid starts on Monday, so Sat/Sun are columns 6 and 7. */
+.calendar .day:nth-child(7n + 6):not(.outside) .num,
+.calendar .day:nth-child(7n + 7):not(.outside) .num {
+    color: #d33;
 }
 
 .calendar .day.today {
@@ -201,8 +217,9 @@ input {
     margin-top: 2px;
     padding: 1px 4px;
     font-size: 0.75rem;
-    background: var(--accent);
-    color: #fff;
+    background: #fff;
+    color: #000;
+    border: 0;
     border-radius: 3px;
     white-space: nowrap;
     overflow: hidden;
@@ -280,7 +297,6 @@ input {
 .event {
     display: block;
     width: 100%;
-    border: 0;
     text-align: left;
     font-family: inherit;
     cursor: pointer;
