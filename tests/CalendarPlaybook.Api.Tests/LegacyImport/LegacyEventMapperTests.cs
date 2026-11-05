@@ -1,7 +1,7 @@
 using System.Text.Json;
 using CalendarPlaybook.Api.Features.Events.CreateEvent;
 using CalendarPlaybook.Api.Infrastructure.Events;
-using CalendarPlaybook.LegacyImport;
+using CalendarPlaybook.Api.Infrastructure.LegacyImport;
 
 namespace CalendarPlaybook.Api.Tests.LegacyImport;
 

@@ -1,6 +1,6 @@
 // One-off import of old Calendarium events (database_backup.json) for one owner.
 // Usage: dotnet run --project tools/CalendarPlaybook.LegacyImport -- --file <path> --owner <auth0 sub> [--dry-run]
-// The connection string is ConnectionStrings:Calendar from the Api's user secrets or the environment.
+// The connection string is ConnectionStrings:someed from the Api's user secrets or the environment.
 // Titles and descriptions are never printed (CLAUDE.md: logs must not contain them).
 
 using System.Text.Json;
@@ -8,7 +8,7 @@ using CalendarPlaybook.Api.Features.Events.CreateEvent;
 using CalendarPlaybook.Api.Infrastructure;
 using CalendarPlaybook.Api.Infrastructure.Database;
 using CalendarPlaybook.Api.Infrastructure.Events;
-using CalendarPlaybook.LegacyImport;
+using CalendarPlaybook.Api.Infrastructure.LegacyImport;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,10 +57,10 @@ var configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-var hasDatabase = !string.IsNullOrWhiteSpace(configuration.GetConnectionString("Calendar"));
+var hasDatabase = !string.IsNullOrWhiteSpace(configuration.GetConnectionString(DatabaseSetup.ConnectionStringName));
 if (!hasDatabase && !dryRun)
 {
-    return Usage("ConnectionStrings:Calendar is not set (Api user secrets or ConnectionStrings__Calendar).");
+    return Usage($"ConnectionStrings:{DatabaseSetup.ConnectionStringName} is not set (Api user secrets or ConnectionStrings__{DatabaseSetup.ConnectionStringName}).");
 }
 
 await using var services = new ServiceCollection().AddCalendarDb(configuration).BuildServiceProvider();

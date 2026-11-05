@@ -7,6 +7,7 @@ using CalendarPlaybook.Api.Features.Events.UpdateEvent;
 using CalendarPlaybook.Api.Infrastructure;
 using CalendarPlaybook.Api.Infrastructure.Auth;
 using CalendarPlaybook.Api.Infrastructure.Database;
+using CalendarPlaybook.Api.Infrastructure.LegacyImport;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,7 +51,14 @@ if (app.Environment.IsDevelopment())
 {
     DevWebServer.Start(app);
 }
+else
+{
+    app.MapSpa();
+}
 
 app.MigrateInDevelopment();
+
+// Runs after the migrations. Seeds only when the Events table has at most one row and Seed:Legacy:Enabled is true.
+// await app.SeedLegacyIfEmptyAsync();
 
 app.Run();

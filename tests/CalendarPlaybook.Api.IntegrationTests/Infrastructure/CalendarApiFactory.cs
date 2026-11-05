@@ -1,3 +1,4 @@
+using CalendarPlaybook.Api.Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -15,7 +16,8 @@ public sealed class CalendarApiFactory(string connectionString) : WebApplication
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
-        builder.UseSetting("ConnectionStrings:Calendar", connectionString);
+        builder.UseSetting($"ConnectionStrings:{DatabaseSetup.ConnectionStringName}", connectionString);
+        builder.UseSetting("Seed:Legacy:Enabled", "false");
         builder.UseSetting("Auth0:Domain", TestTokens.Domain);
         builder.UseSetting("Auth0:Audience", TestTokens.Audience);
 

@@ -15,6 +15,7 @@ Read the spec section that matches your task before changing behaviour.
   - `podman run ... --name calendar-sql` from `docs/podman-sql-notes.md`. In Development the app runs `podman start calendar-sql` on startup (`DevSqlContainer:Name` in `appsettings.Development.json`) and waits until SQL Server accepts connections.
   - `compose.yaml` (`podman compose up -d`). Its container has a different name, so the app does not start it; start it yourself.
 - In Development `dotnet run --project src/CalendarPlaybook.Api` also starts the Vite dev server (`npm run dev` in `DevWebServer:Path`, `Infrastructure/DevWebServer.cs`) and stops it on shutdown. Run `npm install` in `src/CalendarPlaybook.Web` once first. The launch profiles open `http://localhost:5173`.
+- Hosting: `dotnet publish` builds the SPA (`vite build --mode hosted`, `.env.hosted` = same-origin API) into `wwwroot`; outside Development `Infrastructure/SpaHosting.cs` serves it with an `index.html` fallback (`/api/*` stays 404). `-p:SkipSpaBuild=true` skips it. See `docs/local-setup.md`.
 - Config keys (user secrets or environment, never committed): `ConnectionStrings:Calendar`, `Auth0:Domain`, `Auth0:Audience`, `Cors:AllowedOrigin` (SPA origin; `http://localhost:5173` in Development).
 - `docs/plan.md` - the current plan (spec-sync skill).
 - `docs/` - also `local-setup.md` (prerequisites, secrets, run), `AI-SDLC-Playbook-howto.md` (the SDLC process) and `podman-sql-notes.md`.

@@ -39,6 +39,19 @@ dotnet run --project src/CalendarPlaybook.Api
 
 Frontend checks (in `src/CalendarPlaybook.Web`): `npm test` and `npm run build`.
 
+## Hosting (API + UI on one site)
+
+`dotnet publish` builds the React app too (`npm ci` and `vite build --mode hosted`) and puts it in `wwwroot` of the publish output. Outside Development the API serves it from the same origin: `/api/*` is the API, other paths without a file extension return `index.html`.
+
+```sh
+dotnet publish src/CalendarPlaybook.Api -c Release -o publish
+```
+
+- The build machine needs Node.js and the `VITE_AUTH0_*` values (in `src/CalendarPlaybook.Web/.env.local` or as environment variables). `.env.hosted` makes API calls relative, so `VITE_API_URL` is ignored.
+- Add the site URL to the Auth0 SPA application's Allowed Callback, Logout and Web Origins URLs.
+- `Cors:AllowedOrigin` is not needed for the same-origin setup.
+- `-p:SkipSpaBuild=true` publishes the API without the UI.
+
 ## Tests
 
 ```sh

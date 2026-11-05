@@ -18,4 +18,31 @@
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
 
+  <!-- React SPA: dotnet publish builds it (vite mode "hosted", same-origin API) and ships dist/ as wwwroot/.
+       Skip with -p:SkipSpaBuild=true (e.g. when CI builds the SPA separately). -->
+  <PropertyGroup>
+    <SpaRoot>..\CalendarPlaybook.Web\</SpaRoot>
+  </PropertyGroup>
+
+  <Target Name="PublishSpa" AfterTargets="ComputeFilesToPublish" Condition="'$(SkipSpaBuild)' != 'true'">
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm ci" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --mode hosted" />
+    <ItemGroup>
+      <SpaDistFiles Include="$(SpaRoot)dist\**" />
+      <ResolvedFileToPublish Include="@(SpaDistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
+  <!-- Legacy seed data (git-ignored personal data). Shipped with build and publish when present on the build machine. -->
+  <ItemGroup Condition="Exists('..\..\DATA_FROM_OLD_PROJECT\database_backup.json')">
+    <None Include="..\..\DATA_FROM_OLD_PROJECT\database_backup.json"
+          Link="SeedData\database_backup.json"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

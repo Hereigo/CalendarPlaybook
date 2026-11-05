@@ -12,7 +12,7 @@ public static class DatabaseSetup
     {
         return services.AddDbContext<CalendarDbContext>(options =>
         {
-            var connectionString = configuration.GetConnectionString("Calendar");
+            var connectionString = configuration.GetConnectionString("someed");
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new InvalidOperationException(
