@@ -7,7 +7,7 @@ namespace CalendarPlaybook.Api.Infrastructure.LegacyImport;
 /// Seeds the database from the old Calendarium <c>database_backup.json</c> on startup (after a deploy), but only when the
 /// <c>Events</c> table has at most <see cref="MaxExistingRows"/> row. Configured by the <c>Seed:Legacy</c> section:
 /// <c>Enabled</c>, <c>FilePath</c> (relative paths resolve against the app folder) and <c>OwnerId</c>.
-/// The file is copied to the build and publish output as <c>SeedData/database_backup.json</c> by the csproj.
+/// The file is copied to the build output as <c>SeedData/database_backup.json</c> by the csproj; publish leaves it out.
 /// The seed never fails startup: problems are logged as warnings and the app keeps running.
 /// Logs carry counts only, never titles or descriptions (CLAUDE.md).
 /// </summary>

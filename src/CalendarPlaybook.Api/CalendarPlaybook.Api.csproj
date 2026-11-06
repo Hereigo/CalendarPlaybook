@@ -7,6 +7,8 @@
     <UserSecretsId>bc4ad317-7227-421f-99b0-3451771247d3</UserSecretsId>
     <!-- IIS in-process hosting: IIS starts the app on the first request through web.config (no scripts on the host). -->
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <!-- Ship only the English satellite resources of NuGet packages (drops cs, de, fr, ... folders from publish). -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <!-- Development-only files stay out of the hosting folder. -->
@@ -47,12 +49,21 @@
     </ItemGroup>
   </Target>
 
-  <!-- Legacy seed data (git-ignored personal data). Shipped with build and publish when present on the build machine. -->
+  <!-- Favicon: served from wwwroot at /favicon.ico. Vite does not copy files from the project root, so it is shipped here. -->
+  <ItemGroup>
+    <None Include="..\CalendarPlaybook.Web\favicon.ico"
+          Link="wwwroot\favicon.ico"
+          CopyToOutputDirectory="Never"
+          CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Legacy seed data (git-ignored personal data). Copied to the build output when present on the build machine,
+       but never published: the seed is for local runs only. -->
   <ItemGroup Condition="Exists('..\..\DATA_FROM_OLD_PROJECT\database_backup.json')">
     <None Include="..\..\DATA_FROM_OLD_PROJECT\database_backup.json"
           Link="SeedData\database_backup.json"
           CopyToOutputDirectory="PreserveNewest"
-          CopyToPublishDirectory="PreserveNewest" />
+          CopyToPublishDirectory="Never" />
   </ItemGroup>
 
 </Project>
