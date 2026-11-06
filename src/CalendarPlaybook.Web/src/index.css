@@ -271,10 +271,32 @@ input {
             'header'
             'sidebar'
             'main';
+        padding-left: 0;
+        padding-right: 0;
     }
 
     .calendar {
         grid-template-rows: auto repeat(6, minmax(2.75rem, 1fr));
+    }
+
+    .calendar .day {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .calendar .day .num {
+        font-size: 9.2pt; /* 1pt smaller than the 0.85rem (10.2pt) desktop size */
+    }
+
+    .calendar .day.today .num {
+        width: 1.35rem;
+        height: 1.35rem;
+    }
+
+    .event {
+        padding-left: 2px;
+        padding-right: 2px;
+        font-size: 8pt;
     }
 
     .calendar .weekday span:last-child {
