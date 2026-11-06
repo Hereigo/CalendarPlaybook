@@ -1,6 +1,6 @@
 // One-off import of old Calendarium events (database_backup.json) for one owner.
 // Usage: dotnet run --project tools/CalendarPlaybook.LegacyImport -- --file <path> --owner <auth0 sub> [--dry-run]
-// The connection string is ConnectionStrings:someed from the Api's user secrets or the environment.
+// The connection string is ConnectionStrings:Calendar from the Api's user secrets or the environment.
 // Titles and descriptions are never printed (CLAUDE.md: logs must not contain them).
 
 using System.Text.Json;

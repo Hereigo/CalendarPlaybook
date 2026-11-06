@@ -4,6 +4,9 @@ namespace CalendarPlaybook.Api.Infrastructure.Database;
 
 public static class DatabaseSetup
 {
+    /// <summary>The configuration key under <c>ConnectionStrings</c>: <c>ConnectionStrings:Calendar</c>.</summary>
+    public const string ConnectionStringName = "Calendar";
+
     /// <summary>
     /// Registers <see cref="CalendarDbContext"/> on SQL Server. The connection string <c>ConnectionStrings:Calendar</c>
     /// comes from environment variables or user secrets, never from committed config.
@@ -12,7 +15,7 @@ public static class DatabaseSetup
     {
         return services.AddDbContext<CalendarDbContext>(options =>
         {
-            var connectionString = configuration.GetConnectionString("someed");
+            var connectionString = configuration.GetConnectionString(ConnectionStringName);
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new InvalidOperationException(

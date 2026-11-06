@@ -429,3 +429,6 @@ FodyWeavers.xsd
 .env.local
 docs/Auth0-howto.md
 DATA_FROM_OLD_PROJECT/
+src/CalendarPlaybook.Api/appsettings.Production.json
+src/CalendarPlaybook.Web/.env.hosted
+THIS_WORKS/

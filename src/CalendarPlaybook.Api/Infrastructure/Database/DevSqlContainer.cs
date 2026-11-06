@@ -24,7 +24,7 @@ public static class DevSqlContainer
         // Connects to master because the Calendar database doesn’t exist before the first migration.
         if (Start(name, app.Logger))
         {
-            WaitUntilReady(app.Configuration.GetConnectionString("Calendar"), app.Logger);
+            WaitUntilReady(app.Configuration.GetConnectionString(DatabaseSetup.ConnectionStringName), app.Logger);
         }
     }
 

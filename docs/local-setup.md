@@ -50,6 +50,8 @@ dotnet publish src/CalendarPlaybook.Api -c Release -o publish
 - The build machine needs Node.js and the `VITE_AUTH0_*` values (in `src/CalendarPlaybook.Web/.env.local` or as environment variables). `.env.hosted` makes API calls relative, so `VITE_API_URL` is ignored.
 - Add the site URL to the Auth0 SPA application's Allowed Callback, Logout and Web Origins URLs.
 - `Cors:AllowedOrigin` is not needed for the same-origin setup.
+- Hosting config (`ConnectionStrings:Calendar`, `Auth0:Domain`, `Auth0:Audience`) goes in environment variables on the host (`ConnectionStrings__Calendar`, ...) or in `src/CalendarPlaybook.Api/appsettings.Production.json`. That file is git-ignored but `dotnet publish` copies it, so it reaches shared hosting where environment variables cannot be set. Never put these values in `appsettings.json`, which is committed.
+- IIS needs the ASP.NET Core 10 Hosting Bundle and an app pool with "No Managed Code". Without the bundle, publish self-contained: `-r win-x64 --self-contained`.
 - `-p:SkipSpaBuild=true` publishes the API without the UI.
 
 ## Tests
