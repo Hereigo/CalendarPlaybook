@@ -44,7 +44,7 @@ Frontend checks (in `src/CalendarPlaybook.Web`): `npm test` and `npm run build`.
 `dotnet publish` builds the React app too (`npm ci` and `vite build --mode hosted`) and puts it in `wwwroot` of the publish output. Outside Development the API serves it from the same origin: `/api/*` is the API, other paths without a file extension return `index.html`.
 
 ```sh
-dotnet publish src/CalendarPlaybook.Api -c Release -o publish
+dotnet publish src/CalendarPlaybook.Api -p:PublishProfile=FolderProfile
 ```
 
 - The build machine needs Node.js and the `VITE_AUTH0_*` values (in `src/CalendarPlaybook.Web/.env.local` or as environment variables). `.env.hosted` makes API calls relative, so `VITE_API_URL` is ignored.
@@ -52,6 +52,8 @@ dotnet publish src/CalendarPlaybook.Api -c Release -o publish
 - `Cors:AllowedOrigin` is not needed for the same-origin setup.
 - Hosting config (`ConnectionStrings:Calendar`, `Auth0:Domain`, `Auth0:Audience`) goes in environment variables on the host (`ConnectionStrings__Calendar`, ...) or in `src/CalendarPlaybook.Api/appsettings.Production.json`. That file is git-ignored but `dotnet publish` copies it, so it reaches shared hosting where environment variables cannot be set. Never put these values in `appsettings.json`, which is committed.
 - IIS needs the ASP.NET Core 10 Hosting Bundle and an app pool with "No Managed Code". Without the bundle, publish self-contained: `-r win-x64 --self-contained`.
+- Shared hosting (32-bit app pool, no scripts, .NET 10 maybe missing): `dotnet publish src/CalendarPlaybook.Api -p:PublishProfile=FolderProfile`. It publishes self-contained `win-x86` to `publish/` in the repo root, and the committed `web.config` makes IIS start `CalendarPlaybook.Api.exe` with `ASPNETCORE_ENVIRONMENT=Production`. To deploy: upload `publish/app_offline.htm` first (this stops the app and unlocks its DLLs), then the rest of `publish/` including `wwwroot`, then delete `app_offline.htm` on the host, or the site stays offline. The file's source is `src/CalendarPlaybook.Api/Hosting/app_offline.htm`, and publish copies it to the root of `publish/`. For a 64-bit pool change `win-x86` to `win-x64` in the profile. On a start failure (500.30/502.5) set `stdoutLogEnabled="true"` in the deployed `web.config`, create a `logs` folder and read `logs\stdout_*.log`.
+- Production does not apply migrations. The database on the host must already have the schema (for example, generate a script with `dotnet ef migrations script --idempotent` and run it in the host's SQL tool).
 - `-p:SkipSpaBuild=true` publishes the API without the UI.
 
 ## Tests

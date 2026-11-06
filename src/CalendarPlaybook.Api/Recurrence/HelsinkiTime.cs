@@ -7,7 +7,22 @@ public static class HelsinkiTime
 {
     public const string ZoneId = "Europe/Helsinki";
 
-    private static readonly TimeZoneInfo Zone = TimeZoneInfo.FindSystemTimeZoneById(ZoneId);
+    /// <summary>The Windows id of the same zone, for hosts without ICU, where IANA ids cannot be resolved.</summary>
+    public const string WindowsZoneId = "FLE Standard Time";
+
+    private static readonly TimeZoneInfo Zone = FindZone();
+
+    private static TimeZoneInfo FindZone()
+    {
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById(ZoneId);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById(WindowsZoneId);
+        }
+    }
 
     /// <summary>
     /// Returns the UTC instant of a local date and time.

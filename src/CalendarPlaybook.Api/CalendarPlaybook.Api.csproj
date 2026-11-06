@@ -5,7 +5,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>bc4ad317-7227-421f-99b0-3451771247d3</UserSecretsId>
+    <!-- IIS in-process hosting: IIS starts the app on the first request through web.config (no scripts on the host). -->
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
   </PropertyGroup>
+
+  <!-- Development-only files stay out of the hosting folder. -->
+  <ItemGroup>
+    <Content Update="appsettings.Development.json;dotnet-tools.json" CopyToPublishDirectory="Never" />
+    <!-- Shipped to the publish root for deploys: upload it first to stop the app (unlocks DLLs), copy the rest,
+         then delete it on the host. Kept out of the project root, where IIS Express would take the app offline. -->
+    <None Update="Hosting\app_offline.htm" Link="app_offline.htm" CopyToOutputDirectory="Never" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />

@@ -3,7 +3,9 @@ import { useCallback, useMemo } from 'react';
 import { createApi } from './api';
 import Calendar from './Calendar';
 
-const apiUrl = import.meta.env.VITE_API_URL ?? '';
+// The hosted build (vite --mode hosted) is served by the API itself, so it always calls the API on the
+// page's own origin. An absolute URL there breaks as soon as its scheme or host differs (mixed content, CORS).
+const apiUrl = import.meta.env.MODE === 'hosted' ? '' : (import.meta.env.VITE_API_URL ?? '');
 
 export default function App() {
   const { isLoading, isAuthenticated, error, loginWithRedirect, logout, getAccessTokenSilently } = useAuth0();
